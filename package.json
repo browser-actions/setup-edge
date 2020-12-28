@@ -1,0 +1,27 @@
+{
+  "name": "setup-edge",
+  "version": "0.0.0",
+  "description": "Set up your GitHub Actions workflow with a specific version of edge",
+  "main": "dist/index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/browser-actions/setup-edge.git"
+  },
+  "keywords": [
+    "actions",
+    "node",
+    "setup",
+    "edge"
+  ],
+  "author": "Shin'ya Ueoka",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/browser-actions/setup-edge/issues"
+  },
+  "homepage": "https://github.com/browser-actions/setup-edge#readme"
+}

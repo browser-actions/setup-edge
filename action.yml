@@ -1,0 +1,6 @@
+name: 'Setup Edge'
+description: 'Install and setup Microsoft Edge'
+author: "Shin'ya Ueoka"
+runs:
+  using: 'node12'
+  main: 'index.js'

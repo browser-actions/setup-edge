@@ -1,5 +1,6 @@
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
+import * as io from "@actions/io";
 import * as installer from "./installer";
 import { getPlatform } from "./platform";
 import path from "path";
@@ -12,12 +13,17 @@ async function run(): Promise<void> {
 
     core.info(`Setup Edge ${version}`);
 
-    const installDir = await installer.install(platform, version);
-
-    core.addPath(path.join(installDir));
+    await installer.install(platform, version);
     core.info(`Successfully setup Edge ${version}`);
 
-    await exec.exec("edge", ["--version"]);
+    const msedgeBin = await io.which("msedge", true);
+    exec.exec("wmic", [
+      "datafile",
+      "where",
+      `name=${msedgeBin}`,
+      "get",
+      "version",
+    ]);
   } catch (error) {
     core.setFailed(error.message);
   }

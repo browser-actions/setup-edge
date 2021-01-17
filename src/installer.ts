@@ -11,7 +11,7 @@ import path from "path";
 export const install = async (
   platform: Platform,
   version: versions.Version
-): Promise<string> => {
+): Promise<void> => {
   const edgeUpdatesClient = new EdgeUpdatesClient();
   const releases = await edgeUpdatesClient.getReleases();
   const productVersions = releases.getProduct(version);
@@ -21,11 +21,6 @@ export const install = async (
   const product = productVersions.getReleaseByPlatform(platform);
   if (!product) {
     throw new Error(`Unsupported platform: ${platform.os} ${platform.arch}`);
-  }
-  const toolPath = tc.find("edge", product.ProductVersion);
-  if (toolPath) {
-    core.info(`Found in cache @ ${toolPath}`);
-    return toolPath;
   }
   core.info(
     `Attempting to download Edge ${version} (${product.ProductVersion})...`
@@ -45,17 +40,18 @@ export const install = async (
 
   core.info("Installing Edge...");
   try {
-    exec.exec("msiexec.exe", ["/i", installerPath, "/qn", "/log", logFile]);
+    await exec.exec("msiexec.exe", [
+      "/i",
+      installerPath,
+      "/qn",
+      "/log",
+      logFile,
+    ]);
   } catch (e) {
-    core.error("Installation failure");
-    const logData = await fs.promises.readFile(logFile, { encoding: "utf-8" });
-    core.error(logData);
+    core.error("Installation failure" + e);
     throw e;
+  } finally {
+    const logData = await fs.promises.readFile(logFile, { encoding: "utf-8" });
+    core.info(logData);
   }
-
-  // core.info("Adding to the cache ...");
-  // const cachedDir = await tc.cacheDir(extPath, "edge", version);
-  // core.info(`Successfully cached Edge to ${cachedDir}`);
-  // return cachedDir;
-  return "";
 };

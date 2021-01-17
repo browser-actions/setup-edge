@@ -1,5 +1,12 @@
 import * as httpm from "@actions/http-client";
 import { Platform, OS, Arch } from "./platform";
+import {
+  StableVersion,
+  BetaVersion,
+  DevVersion,
+  CanaryVersion,
+  Version,
+} from "./params";
 
 type EdgeUpdatesProductReleaseArtifactJSON = {
   ArtifactName: string;
@@ -76,9 +83,17 @@ export class EdgeUpdatesProduct {
 }
 
 export class EdgeUpdates {
+  private static readonly ProductValues = {
+    [StableVersion]: "Stable",
+    [BetaVersion]: "Beta",
+    [DevVersion]: "Dev",
+    [CanaryVersion]: "canary",
+  };
+
   constructor(private readonly json: EdgeUpdatesJSON) {}
 
-  getProduct(productName: string): EdgeUpdatesProduct | undefined {
+  getProduct(version: Version): EdgeUpdatesProduct | undefined {
+    const productName = EdgeUpdates.ProductValues[version];
     const product = this.json.find((p) => p.Product === productName);
     if (product) {
       return new EdgeUpdatesProduct(product);

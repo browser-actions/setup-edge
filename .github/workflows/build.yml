@@ -7,7 +7,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu, macos, windows]
+        os: [windows]
     runs-on: ${{ matrix.os }}-latest
     steps:
       - uses: actions/checkout@v2
@@ -74,7 +74,7 @@ jobs:
           git push origin latest
 
   test-latest:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: [deploy]
     steps:
       - uses: browser-actions/setup-edge@latest

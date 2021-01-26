@@ -22,7 +22,7 @@ async function run(): Promise<void> {
     await exec.exec("wmic", [
       "datafile",
       "where",
-      `name=${msedgeBin.replace(/\\/g, "\\\\")}`,
+      `name="${msedgeBin.replace(/\\/g, "\\\\")}"`,
       "get",
       "version",
     ]);

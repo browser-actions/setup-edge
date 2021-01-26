@@ -28,6 +28,14 @@ jobs:
       # Test built action itself
       - uses: ./dist/
       - run: (Get-Item (Get-Command msedge).Source).VersionInfo.ProductVersion
+      - uses: ./dist/
+        with:
+          edge-version: beta
+      - run: (Get-Item (Get-Command msedge).Source).VersionInfo.ProductVersion
+      - uses: ./dist/
+        with:
+          edge-version: dev
+      - run: (Get-Item (Get-Command msedge).Source).VersionInfo.ProductVersion
 
   deploy:
     runs-on: ubuntu-latest

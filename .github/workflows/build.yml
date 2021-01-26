@@ -27,7 +27,7 @@ jobs:
 
       # Test built action itself
       - uses: ./dist/
-      - run: chromium --version
+      - run: (Get-Item (Get-Command msedge).Source).VersionInfo.ProductVersion
 
   deploy:
     runs-on: ubuntu-latest

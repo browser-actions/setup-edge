@@ -1,12 +1,6 @@
 import * as httpm from "@actions/http-client";
 import { Platform, OS, Arch } from "./platform";
-import {
-  StableVersion,
-  BetaVersion,
-  DevVersion,
-  CanaryVersion,
-  Version,
-} from "./params";
+import { StableVersion, BetaVersion, DevVersion, Version } from "./params";
 
 type EdgeUpdatesProductReleaseArtifactJSON = {
   ArtifactName: string;
@@ -87,7 +81,6 @@ export class EdgeUpdates {
     [StableVersion]: "Stable",
     [BetaVersion]: "Beta",
     [DevVersion]: "Dev",
-    [CanaryVersion]: "canary",
   };
 
   constructor(private readonly json: EdgeUpdatesJSON) {}

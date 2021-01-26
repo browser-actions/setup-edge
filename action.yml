@@ -2,7 +2,7 @@ name: 'Setup Edge'
 description: 'Install and setup Microsoft Edge'
 author: "Shin'ya Ueoka"
 input:
-  edge-version: 'The Edge version to be installed.  Supported versions are "stable", "beta", "dev", "canary"'
+  edge-version: 'The Edge version to be installed.  Supported versions are "stable", "beta", "dev"'
 runs:
   using: 'node12'
   main: 'index.js'

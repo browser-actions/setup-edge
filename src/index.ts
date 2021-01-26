@@ -13,8 +13,11 @@ async function run(): Promise<void> {
 
     core.info(`Setup Edge ${version}`);
 
-    await installer.install(platform, version);
+    const installDir = await installer.install(platform, version);
     core.info(`Successfully setup Edge ${version}`);
+
+    core.addPath(installDir);
+    await installer.install(platform, version);
 
     const msedgeBin = await io.which("msedge", true);
     exec.exec("wmic", [

@@ -11,7 +11,7 @@ import path from "path";
 export const install = async (
   platform: Platform,
   version: versions.Version
-): Promise<void> => {
+): Promise<string> => {
   const edgeUpdatesClient = new EdgeUpdatesClient();
   const releases = await edgeUpdatesClient.getReleases();
   const productVersions = releases.getProduct(version);
@@ -47,6 +47,11 @@ export const install = async (
       "/log",
       logFile,
     ]);
+
+    return path.join(
+      "C:\\Program Files (x86)\\Microsoft\\Edge\\Application",
+      product.ProductVersion
+    );
   } catch (e) {
     core.error("Installation failure" + e);
     throw e;

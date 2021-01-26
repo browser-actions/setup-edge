@@ -17,7 +17,6 @@ async function run(): Promise<void> {
     core.info(`Successfully setup Edge ${version}`);
 
     core.addPath(installDir);
-    await installer.install(platform, version);
 
     const msedgeBin = await io.which("msedge", true);
     await exec.exec("wmic", [

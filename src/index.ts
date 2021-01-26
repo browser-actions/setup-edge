@@ -20,10 +20,10 @@ async function run(): Promise<void> {
     await installer.install(platform, version);
 
     const msedgeBin = await io.which("msedge", true);
-    exec.exec("wmic", [
+    await exec.exec("wmic", [
       "datafile",
       "where",
-      `name=${msedgeBin.replace("\\", "\\\\")}`,
+      `name=${msedgeBin.replace(/\\/g, "\\\\")}`,
       "get",
       "version",
     ]);

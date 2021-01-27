@@ -48,10 +48,25 @@ export const install = async (
       logFile,
     ]);
 
-    return path.join(
-      "C:\\Program Files (x86)\\Microsoft\\Edge\\Application",
-      product.ProductVersion
-    );
+    return (() => {
+      switch (version) {
+        case versions.StableVersion:
+          return path.join(
+            "C:\\Program Files (x86)\\Microsoft\\Edge\\Application",
+            product.ProductVersion
+          );
+        case versions.BetaVersion:
+          return path.join(
+            "C:\\Program Files (x86)\\Microsoft\\Edge Beta\\Application",
+            product.ProductVersion
+          );
+        case versions.DevVersion:
+          return path.join(
+            "C:\\Program Files (x86)\\Microsoft\\Edge Dev\\Application",
+            product.ProductVersion
+          );
+      }
+    })();
   } catch (e) {
     core.error("Installation failure" + e);
     throw e;

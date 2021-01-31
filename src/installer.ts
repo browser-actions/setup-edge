@@ -65,6 +65,11 @@ export const install = async (
             "C:\\Program Files (x86)\\Microsoft\\Edge Dev\\Application",
             product.ProductVersion
           );
+        case versions.CanaryVersion:
+          return path.join(
+            "C:\\Program Files (x86)\\Microsoft\\Edge Canary\\Application",
+            product.ProductVersion
+          );
       }
     })();
   } catch (e) {

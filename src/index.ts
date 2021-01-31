@@ -3,7 +3,6 @@ import * as exec from "@actions/exec";
 import * as io from "@actions/io";
 import * as installer from "./installer";
 import { getPlatform } from "./platform";
-import path from "path";
 import { valueOfVersion } from "./params";
 
 async function run(): Promise<void> {

@@ -71,17 +71,17 @@ describe("EdgeUpdatesProductRelease", () => {
     it("returns the release by platform", () => {
       let artifact = updates
         ?.getProduct("stable")
-        .getReleaseByPlatform({ os: "windows", arch: "amd64" })
-        .getPreferredArtifact();
+        ?.getReleaseByPlatform({ os: "windows", arch: "amd64" })
+        ?.getPreferredArtifact();
 
-      expect(artifact.ArtifactName).toBe("msi");
+      expect(artifact?.ArtifactName).toBe("msi");
 
       artifact = updates
         ?.getProduct("stable")
-        .getReleaseByPlatform({ os: "darwin", arch: "amd64" })
-        .getPreferredArtifact();
+        ?.getReleaseByPlatform({ os: "darwin", arch: "amd64" })
+        ?.getPreferredArtifact();
 
-      expect(artifact.ArtifactName).toBe("pkg");
+      expect(artifact?.ArtifactName).toBe("pkg");
     });
   });
 });

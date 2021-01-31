@@ -22,6 +22,7 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - run: yarn install --frozen-lockfile
+      - run: yarn test
       - run: yarn build
       - run: yarn package
 
@@ -58,7 +59,6 @@ jobs:
           path: 'dist'
 
       - run: yarn install --frozen-lockfile
-      - run: yarn test
       - run: yarn build
       - run: yarn package
       - name: Setup git

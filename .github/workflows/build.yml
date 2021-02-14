@@ -5,11 +5,7 @@ on:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        os: [windows]
-        edge-version: [null, "stable", "beta", "dev", "canary"]
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Get yarn cache directory path
@@ -26,7 +22,24 @@ jobs:
       - run: yarn test
       - run: yarn build
       - run: yarn package
-      - uses: ./dist/
+      - uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: ./dist/
+
+  test:
+    needs: [build]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows]
+        edge-version: [null, "stable", "beta", "dev", "canary"]
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: dist
+      - uses: ./
         with:
           edge-version: ${{ matrix.edge-version }}
 

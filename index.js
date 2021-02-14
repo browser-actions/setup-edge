@@ -4930,123 +4930,6 @@ module.exports = v4;
 
 /***/ }),
 
-/***/ 970:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.EdgeUpdatesClient = exports.EdgeUpdates = exports.EdgeUpdatesProduct = exports.EdgeUpdatesProductRelease = void 0;
-const httpm = __importStar(__webpack_require__(925));
-const platform_1 = __webpack_require__(999);
-const params_1 = __webpack_require__(873);
-class EdgeUpdatesProductRelease {
-    constructor(json) {
-        this.json = json;
-    }
-    getPreferredArtifact() {
-        const artifactName = EdgeUpdatesProductRelease.ArtifactNameValues[this.json.Platform];
-        return this.json.Artifacts.find((a) => a.ArtifactName === artifactName);
-    }
-    get ProductVersion() {
-        return this.json.ProductVersion;
-    }
-}
-exports.EdgeUpdatesProductRelease = EdgeUpdatesProductRelease;
-EdgeUpdatesProductRelease.ArtifactNameValues = {
-    Windows: "msi",
-    MacOS: "pkg",
-};
-class EdgeUpdatesProduct {
-    constructor(json) {
-        this.json = json;
-    }
-    getReleaseByPlatform({ os, arch, }) {
-        const platformValue = EdgeUpdatesProduct.PlatformValues[os];
-        const archValue = EdgeUpdatesProduct.ArchValues[arch];
-        const release = this.json.Releases.find((r) => r.Platform === platformValue && r.Architecture === archValue);
-        if (release) {
-            return new EdgeUpdatesProductRelease(release);
-        }
-    }
-}
-exports.EdgeUpdatesProduct = EdgeUpdatesProduct;
-EdgeUpdatesProduct.PlatformValues = {
-    [platform_1.OS.WINDOWS]: "Windows",
-    [platform_1.OS.DARWIN]: "MacOS",
-};
-EdgeUpdatesProduct.ArchValues = {
-    [platform_1.Arch.I686]: "x86",
-    [platform_1.Arch.AMD64]: "x64",
-    [platform_1.Arch.ARM64]: "arm64",
-};
-class EdgeUpdates {
-    constructor(json) {
-        this.json = json;
-    }
-    getProduct(version) {
-        const productName = EdgeUpdates.ProductValues[version];
-        const product = this.json.find((p) => p.Product === productName);
-        if (product) {
-            return new EdgeUpdatesProduct(product);
-        }
-    }
-}
-exports.EdgeUpdates = EdgeUpdates;
-EdgeUpdates.ProductValues = {
-    [params_1.StableVersion]: "Stable",
-    [params_1.BetaVersion]: "Beta",
-    [params_1.DevVersion]: "Dev",
-};
-class EdgeUpdatesClient {
-    getReleases() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const url = "https://edgeupdates.microsoft.com/api/products?view=enterprise";
-            const http = new httpm.HttpClient("setup-edge");
-            const resp = yield http.getJson(url);
-            if (resp.statusCode !== httpm.HttpCodes.OK) {
-                throw new Error(`Failed to get latest version: server returns ${resp.statusCode}`);
-            }
-            if (resp.result === null) {
-                throw new Error("Failed to get latest version: server returns empty body");
-            }
-            return new EdgeUpdates(resp.result);
-        });
-    }
-}
-exports.EdgeUpdatesClient = EdgeUpdatesClient;
-
-
-/***/ }),
-
 /***/ 144:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -5157,57 +5040,48 @@ const tc = __importStar(__webpack_require__(784));
 const core = __importStar(__webpack_require__(186));
 const exec = __importStar(__webpack_require__(514));
 const versions = __importStar(__webpack_require__(873));
-const client_1 = __webpack_require__(970);
 const fs_1 = __importDefault(__webpack_require__(747));
 const os_1 = __importDefault(__webpack_require__(87));
 const path_1 = __importDefault(__webpack_require__(622));
 const install = (platform, version) => __awaiter(void 0, void 0, void 0, function* () {
-    const edgeUpdatesClient = new client_1.EdgeUpdatesClient();
-    const releases = yield edgeUpdatesClient.getReleases();
-    const productVersions = releases.getProduct(version);
-    if (!productVersions) {
-        throw new Error(`Unsupported version: ${version}`);
-    }
-    const product = productVersions.getReleaseByPlatform(platform);
-    if (!product) {
-        throw new Error(`Unsupported platform: ${platform.os} ${platform.arch}`);
-    }
-    core.info(`Attempting to download Edge ${version} (${product.ProductVersion})...`);
-    const artifact = product.getPreferredArtifact();
-    if (!artifact) {
-        throw new Error(`artifact not found for ${platform.os} ${platform.arch} on ${product.ProductVersion}`);
-    }
-    core.info(`Acquiring ${version} from ${artifact.Location}`);
-    const installerPath = yield tc.downloadTool(artifact.Location);
+    core.info(`Attempting to download Edge ${version}...`);
+    const url = (() => {
+        switch (version) {
+            case versions.StableVersion:
+                return `https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Stable&language=en`;
+            case versions.BetaVersion:
+                return `https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Beta&language=en`;
+            case versions.DevVersion:
+                return `https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Dev&language=en`;
+            case versions.CanaryVersion:
+                return `https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Canary&language=en`;
+        }
+    })();
+    const installDir = (() => {
+        switch (version) {
+            case versions.StableVersion:
+                return "C:\\Program Files (x86)\\Microsoft\\Edge\\Application";
+            case versions.BetaVersion:
+                return "C:\\Program Files (x86)\\Microsoft\\Edge Beta\\Application";
+            case versions.DevVersion:
+                return "C:\\Program Files (x86)\\Microsoft\\Edge Dev\\Application";
+            case versions.CanaryVersion:
+                return path_1.default.join(os_1.default.homedir(), "AppData\\Local\\Microsoft\\Edge SxS\\Application");
+        }
+    })();
+    core.info(`Acquiring ${version} from ${url}`);
+    let installer = yield tc.downloadTool(url);
+    yield fs_1.default.promises.rename(installer, `${installer}.exe`);
+    installer = `${installer}.exe`;
     const dir = yield fs_1.default.promises.mkdtemp(path_1.default.join(os_1.default.tmpdir(), ""));
-    const logFile = path_1.default.join(dir, "edge-install.log");
     core.info("Installing Edge...");
     try {
-        yield exec.exec("msiexec.exe", [
-            "/i",
-            installerPath,
-            "/qn",
-            "/log",
-            logFile,
-        ]);
-        return (() => {
-            switch (version) {
-                case versions.StableVersion:
-                    return path_1.default.join("C:\\Program Files (x86)\\Microsoft\\Edge\\Application", product.ProductVersion);
-                case versions.BetaVersion:
-                    return path_1.default.join("C:\\Program Files (x86)\\Microsoft\\Edge Beta\\Application", product.ProductVersion);
-                case versions.DevVersion:
-                    return path_1.default.join("C:\\Program Files (x86)\\Microsoft\\Edge Dev\\Application", product.ProductVersion);
-            }
-        })();
+        yield exec.exec(installer);
+        return installDir;
     }
     catch (e) {
         core.error("Installation failure" + e);
         throw e;
-    }
-    finally {
-        const logData = yield fs_1.default.promises.readFile(logFile, { encoding: "utf-8" });
-        core.info(logData);
     }
 });
 exports.install = install;
@@ -5221,15 +5095,17 @@ exports.install = install;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.valueOfVersion = exports.DevVersion = exports.BetaVersion = exports.StableVersion = void 0;
+exports.valueOfVersion = exports.CanaryVersion = exports.DevVersion = exports.BetaVersion = exports.StableVersion = void 0;
 exports.StableVersion = "stable";
 exports.BetaVersion = "beta";
 exports.DevVersion = "dev";
+exports.CanaryVersion = "canary";
 const valueOfVersion = (value) => {
     switch (value) {
         case exports.StableVersion:
         case exports.BetaVersion:
         case exports.DevVersion:
+        case exports.CanaryVersion:
             return value;
         default:
             throw new Error("Unsupported version: " + value);

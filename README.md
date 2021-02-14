@@ -18,8 +18,17 @@ Basic usage:
 ```yaml
 steps:
   - uses: browser-actions/setup-edge@latest
+  - name: Print Edge version
+    run: (Get-Item (Get-Command msedge).Source).VersionInfo.ProductVersion
+```
+
+Install Edge Beta:
+
+```yaml
+steps:
+  - uses: browser-actions/setup-edge@latest
     with:
-      edge-version: stable
+      edge-version: beta
   - name: Print Edge version
     run: (Get-Item (Get-Command msedge).Source).VersionInfo.ProductVersion
 ```
@@ -27,7 +36,7 @@ steps:
 ## Parameters
 
 - `edge-version`:
-*(Optional)* The Edge version to be installed.  Supported versions are "stable", "beta", "dev". Default: `stable`.
+*(Optional)* The Edge version to be installed.  Supported versions are "stable", "beta", "dev", and "canary". Default: `stable`.
 
 ## License
 

@@ -8,6 +8,7 @@ jobs:
     strategy:
       matrix:
         os: [windows]
+        edge-version: [null, "stable", "beta", "dev", "canary"]
     runs-on: ${{ matrix.os }}-latest
     steps:
       - uses: actions/checkout@v2
@@ -25,18 +26,9 @@ jobs:
       - run: yarn test
       - run: yarn build
       - run: yarn package
-
-      # Test built action itself
-      - uses: ./dist/
-      - run: (Get-Item (Get-Command msedge).Source).VersionInfo.ProductVersion
       - uses: ./dist/
         with:
-          edge-version: beta
-      - run: (Get-Item (Get-Command msedge).Source).VersionInfo.ProductVersion
-      - uses: ./dist/
-        with:
-          edge-version: dev
-      - run: (Get-Item (Get-Command msedge).Source).VersionInfo.ProductVersion
+          edge-version: ${{ matrix.edge-version }}
 
   deploy:
     runs-on: ubuntu-latest

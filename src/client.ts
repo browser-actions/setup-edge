@@ -1,12 +1,6 @@
 import * as httpm from "@actions/http-client";
 import { Platform, OS, Arch } from "./platform";
-import {
-  StableVersion,
-  BetaVersion,
-  DevVersion,
-  CanaryVersion,
-  Version,
-} from "./params";
+import { StableVersion, BetaVersion, DevVersion, Version } from "./params";
 
 type EdgeUpdatesProductReleaseArtifactJSON = {
   ArtifactName: string;
@@ -92,9 +86,6 @@ export class EdgeUpdates {
   constructor(private readonly json: EdgeUpdatesJSON) {}
 
   getProduct(version: Version): EdgeUpdatesProduct | undefined {
-    if (version === CanaryVersion) {
-      throw new Error(`Unsupported version: ${version}`);
-    }
     const productName = EdgeUpdates.ProductValues[version];
     const product = this.json.find((p) => p.Product === productName);
     if (product) {

@@ -1,7 +1,7 @@
 name: 'Setup Edge'
 description: 'Install and setup Microsoft Edge'
 author: "Shin'ya Ueoka"
-inputs:
+input:
   edge-version:
     description: |-
       The Edge version to be installed.  Supported versions are "stable", "beta", "dev"

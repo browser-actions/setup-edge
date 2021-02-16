@@ -32,14 +32,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows]
+        os: [windows, macos]
         edge-version: [null, "stable", "beta", "dev", "canary"]
     runs-on: ${{ matrix.os }}-latest
     steps:
       - uses: actions/download-artifact@v2
         with:
           name: dist
-      - uses: ./
+      - name: "Install ${{ matrix.edge-version }} on ${{ matrix.os }}"
+        uses: ./
         with:
           edge-version: ${{ matrix.edge-version }}
 

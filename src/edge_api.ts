@@ -87,14 +87,12 @@ export class EdgeUpdates {
     [StableVersion]: "Stable",
     [BetaVersion]: "Beta",
     [DevVersion]: "Dev",
+    [CanaryVersion]: "Canary",
   };
 
   constructor(private readonly json: EdgeUpdatesJSON) {}
 
   getProduct(version: Version): EdgeUpdatesProduct | undefined {
-    if (version === CanaryVersion) {
-      throw new Error(`Unsupported version: ${version}`);
-    }
     const productName = EdgeUpdates.ProductValues[version];
     const product = this.json.find((p) => p.Product === productName);
     if (product) {

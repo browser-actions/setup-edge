@@ -37,9 +37,6 @@ export class MacInstaller implements Installer {
         `Unsupported platform: ${this.platform.os} ${this.platform.arch}`
       );
     }
-    core.info(
-      `Attempting to download Edge ${version} (${product.ProductVersion})...`
-    );
     const artifact = product.getPreferredArtifact();
     if (!artifact) {
       throw new Error(
@@ -48,7 +45,9 @@ export class MacInstaller implements Installer {
     }
     artifact.Location;
 
-    core.info(`Acquiring ${version} from ${artifact.Location}`);
+    core.info(
+      `Acquiring ${version} (${product.ProductVersion}) from ${artifact.Location}`
+    );
     const archive = await tc.downloadTool(artifact.Location);
 
     return { archive };
@@ -112,6 +111,6 @@ export class MacInstaller implements Installer {
   async test(version: versions.Version): Promise<void> {
     const bin = path.basename(this.binPath(version));
     const msedgeBin = await io.which(bin, true);
-    await exec.exec(msedgeBin, ["--version"]);
+    await exec.exec(`"${msedgeBin}"`, ["--version"]);
   }
 }

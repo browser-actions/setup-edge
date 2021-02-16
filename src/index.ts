@@ -3,6 +3,7 @@ import { getPlatform, OS } from "./platform";
 import { valueOfVersion } from "./params";
 import { WindowsInstaller } from "./installer_windows";
 import { MacInstaller } from "./installer_mac";
+import path from "path";
 
 async function run(): Promise<void> {
   try {
@@ -39,7 +40,8 @@ async function run(): Promise<void> {
       return result;
     })();
 
-    core.addPath(result.root);
+    const bin = path.join(result.root, result.bin);
+    core.addPath(path.dirname(bin));
 
     await installer.test(version);
   } catch (error) {

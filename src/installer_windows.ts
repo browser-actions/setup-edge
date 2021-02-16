@@ -76,7 +76,7 @@ export class WindowsInstaller implements Installer {
     }
   }
 
-  async test(): Promise<void> {
+  async test(version: versions.Version): Promise<void> {
     const msedgeBin = await io.which("msedge", true);
     await exec.exec("wmic", [
       "datafile",

@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { EdgeUpdates } from "../src/client";
+import { EdgeUpdates } from "../src/edge_api";
 
 describe("EdgeUpdates", () => {
   let updates: EdgeUpdates;

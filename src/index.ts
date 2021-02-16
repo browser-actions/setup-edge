@@ -1,15 +1,26 @@
 import * as core from "@actions/core";
-import { getPlatform } from "./platform";
+import { getPlatform, OS } from "./platform";
 import { valueOfVersion } from "./params";
 import { WindowsInstaller } from "./installer_windows";
+import { MacInstaller } from "./installer_mac";
 
 async function run(): Promise<void> {
   try {
     const version = valueOfVersion(core.getInput("edge-version") || "stable");
     const platform = getPlatform();
-    const installer = new WindowsInstaller(platform);
 
     core.info(`Setup Edge ${version}`);
+
+    const installer = (() => {
+      switch (platform.os) {
+        case OS.WINDOWS:
+          return new WindowsInstaller(platform);
+        case OS.DARWIN:
+          return new MacInstaller(platform);
+        default:
+          throw new Error(`Unsupported platform: ${platform.os}`);
+      }
+    })();
 
     const result = await (async () => {
       const installed = await installer.checkInstalled(version);
@@ -30,7 +41,7 @@ async function run(): Promise<void> {
 
     core.addPath(result.root);
 
-    await installer.test();
+    await installer.test(version);
   } catch (error) {
     core.setFailed(error.message);
   }

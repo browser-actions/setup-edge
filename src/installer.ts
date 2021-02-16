@@ -16,5 +16,5 @@ export interface Installer {
 
   install(version: versions.Version, archive: string): Promise<InstallResult>;
 
-  test(): Promise<void>;
+  test(version: versions.Version): Promise<void>;
 }

@@ -63,10 +63,10 @@ export class MacInstaller implements Installer {
     await exec.exec("xar", ["-xf", archive], { cwd: extdir });
 
     const pkgdir = (await fs.promises.readdir(extdir)).filter(
-      (e) => e.startsWith("MicrosoftEdge-") && e.endsWith(".pkg")
+      (e) => e.startsWith("MicrosoftEdge") && e.endsWith(".pkg")
     )[0];
     if (!pkgdir) {
-      throw new Error('"MicrosoftEdge-*.pkg" not found in extracted archive');
+      throw new Error('"MicrosoftEdge*.pkg" not found in extracted archive');
     }
     const pkgroot = path.join(extdir, pkgdir); // /tmp/msedge-xxxx/MicrosoftEdge-xx.x.xxx.x.pkg/
 

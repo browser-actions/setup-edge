@@ -87,14 +87,12 @@ export class EdgeUpdates {
     [StableVersion]: "Stable",
     [BetaVersion]: "Beta",
     [DevVersion]: "Dev",
+    [CanaryVersion]: "Canary",
   };
 
   constructor(private readonly json: EdgeUpdatesJSON) {}
 
   getProduct(version: Version): EdgeUpdatesProduct | undefined {
-    if (version === CanaryVersion) {
-      throw new Error(`Unsupported version: ${version}`);
-    }
     const productName = EdgeUpdates.ProductValues[version];
     const product = this.json.find((p) => p.Product === productName);
     if (product) {
@@ -105,8 +103,8 @@ export class EdgeUpdates {
 
 export class EdgeUpdatesClient {
   async getReleases(): Promise<EdgeUpdates> {
-    const url =
-      "https://edgeupdates.microsoft.com/api/products?view=enterprise";
+    // https://docs.microsoft.com/en-us/mem/configmgr/apps/deploy-use/deploy-edge
+    const url = "https://edgeupdates.microsoft.com/api/products";
     const http = new httpm.HttpClient("setup-edge");
     const resp = await http.getJson<EdgeUpdatesJSON>(url);
     if (resp.statusCode !== httpm.HttpCodes.OK) {

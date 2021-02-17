@@ -4930,7 +4930,7 @@ module.exports = v4;
 
 /***/ }),
 
-/***/ 144:
+/***/ 147:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -4964,41 +4964,92 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(186));
-const exec = __importStar(__nccwpck_require__(514));
-const io = __importStar(__nccwpck_require__(436));
-const installer = __importStar(__nccwpck_require__(574));
+exports.EdgeUpdatesClient = exports.EdgeUpdates = exports.EdgeUpdatesProduct = exports.EdgeUpdatesProductRelease = void 0;
+const httpm = __importStar(__nccwpck_require__(925));
 const platform_1 = __nccwpck_require__(999);
 const params_1 = __nccwpck_require__(873);
-function run() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const version = params_1.valueOfVersion(core.getInput("edge-version") || "stable");
-            const platform = platform_1.getPlatform();
-            core.info(`Setup Edge ${version}`);
-            const installDir = yield installer.install(platform, version);
-            core.info(`Successfully setup Edge ${version}`);
-            core.addPath(installDir);
-            const msedgeBin = yield io.which("msedge", true);
-            yield exec.exec("wmic", [
-                "datafile",
-                "where",
-                `name="${msedgeBin.replace(/\\/g, "\\\\")}"`,
-                "get",
-                "version",
-            ]);
-        }
-        catch (error) {
-            core.setFailed(error.message);
-        }
-    });
+class EdgeUpdatesProductRelease {
+    constructor(json) {
+        this.json = json;
+    }
+    getPreferredArtifact() {
+        const artifactName = EdgeUpdatesProductRelease.ArtifactNameValues[this.json.Platform];
+        return this.json.Artifacts.find((a) => a.ArtifactName === artifactName);
+    }
+    get ProductVersion() {
+        return this.json.ProductVersion;
+    }
 }
-run();
+exports.EdgeUpdatesProductRelease = EdgeUpdatesProductRelease;
+EdgeUpdatesProductRelease.ArtifactNameValues = {
+    Windows: "msi",
+    MacOS: "pkg",
+};
+class EdgeUpdatesProduct {
+    constructor(json) {
+        this.json = json;
+    }
+    getReleaseByPlatform({ os, arch, }) {
+        const platformValue = EdgeUpdatesProduct.PlatformValues[os];
+        const archValue = EdgeUpdatesProduct.ArchValues[arch];
+        const release = this.json.Releases.find((r) => r.Platform === platformValue && r.Architecture === archValue);
+        if (release) {
+            return new EdgeUpdatesProductRelease(release);
+        }
+    }
+}
+exports.EdgeUpdatesProduct = EdgeUpdatesProduct;
+EdgeUpdatesProduct.PlatformValues = {
+    [platform_1.OS.WINDOWS]: "Windows",
+    [platform_1.OS.DARWIN]: "MacOS",
+};
+EdgeUpdatesProduct.ArchValues = {
+    [platform_1.Arch.I686]: "x86",
+    [platform_1.Arch.AMD64]: "x64",
+    [platform_1.Arch.ARM64]: "arm64",
+};
+class EdgeUpdates {
+    constructor(json) {
+        this.json = json;
+    }
+    getProduct(version) {
+        const productName = EdgeUpdates.ProductValues[version];
+        const product = this.json.find((p) => p.Product === productName);
+        if (product) {
+            return new EdgeUpdatesProduct(product);
+        }
+    }
+}
+exports.EdgeUpdates = EdgeUpdates;
+EdgeUpdates.ProductValues = {
+    [params_1.StableVersion]: "Stable",
+    [params_1.BetaVersion]: "Beta",
+    [params_1.DevVersion]: "Dev",
+    [params_1.CanaryVersion]: "Canary",
+};
+class EdgeUpdatesClient {
+    getReleases() {
+        return __awaiter(this, void 0, void 0, function* () {
+            // https://docs.microsoft.com/en-us/mem/configmgr/apps/deploy-use/deploy-edge
+            const url = "https://edgeupdates.microsoft.com/api/products";
+            const http = new httpm.HttpClient("setup-edge");
+            const resp = yield http.getJson(url);
+            if (resp.statusCode !== httpm.HttpCodes.OK) {
+                throw new Error(`Failed to get latest version: server returns ${resp.statusCode}`);
+            }
+            if (resp.result === null) {
+                throw new Error("Failed to get latest version: server returns empty body");
+            }
+            return new EdgeUpdates(resp.result);
+        });
+    }
+}
+exports.EdgeUpdatesClient = EdgeUpdatesClient;
 
 
 /***/ }),
 
-/***/ 574:
+/***/ 144:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -5035,17 +5086,273 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.install = void 0;
+const core = __importStar(__nccwpck_require__(186));
+const platform_1 = __nccwpck_require__(999);
+const params_1 = __nccwpck_require__(873);
+const installer_windows_1 = __nccwpck_require__(332);
+const installer_mac_1 = __nccwpck_require__(496);
+const path_1 = __importDefault(__nccwpck_require__(622));
+function run() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const version = params_1.valueOfVersion(core.getInput("edge-version") || "stable");
+            const platform = platform_1.getPlatform();
+            core.info(`Setup Edge ${version}`);
+            const installer = (() => {
+                switch (platform.os) {
+                    case platform_1.OS.WINDOWS:
+                        return new installer_windows_1.WindowsInstaller(platform);
+                    case platform_1.OS.DARWIN:
+                        return new installer_mac_1.MacInstaller(platform);
+                    default:
+                        throw new Error(`Unsupported platform: ${platform.os}`);
+                }
+            })();
+            const result = yield (() => __awaiter(this, void 0, void 0, function* () {
+                const installed = yield installer.checkInstalled(version);
+                if (installed) {
+                    core.info(`Edge ${version} is already installed @ ${installed.root}`);
+                    return installed;
+                }
+                core.info(`Attempting to download Edge ${version}...`);
+                const downloaded = yield installer.download(version);
+                core.info("Installing Edge...");
+                const result = yield installer.install(version, downloaded.archive);
+                core.info(`Successfully setup Edge ${version}`);
+                return result;
+            }))();
+            const bin = path_1.default.join(result.root, result.bin);
+            core.addPath(path_1.default.dirname(bin));
+            yield installer.test(version);
+        }
+        catch (error) {
+            core.setFailed(error.message);
+        }
+    });
+}
+run();
+
+
+/***/ }),
+
+/***/ 496:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MacInstaller = void 0;
+const edge_api_1 = __nccwpck_require__(147);
+const versions = __importStar(__nccwpck_require__(873));
+const path_1 = __importDefault(__nccwpck_require__(622));
+const os_1 = __importDefault(__nccwpck_require__(87));
+const fs_1 = __importDefault(__nccwpck_require__(747));
 const tc = __importStar(__nccwpck_require__(784));
+const io = __importStar(__nccwpck_require__(436));
 const core = __importStar(__nccwpck_require__(186));
 const exec = __importStar(__nccwpck_require__(514));
+class MacInstaller {
+    constructor(platform) {
+        this.platform = platform;
+        this.api = new edge_api_1.EdgeUpdatesClient();
+    }
+    checkInstalled(version) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const root = tc.find("msedge", version);
+            if (root) {
+                core.info(`Found in cache @ ${root}`);
+                return { root, bin: this.binPath(version) };
+            }
+        });
+    }
+    download(version) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const releases = yield this.api.getReleases();
+            const productVersions = releases.getProduct(version);
+            if (!productVersions) {
+                throw new Error(`Unsupported version: ${version}`);
+            }
+            const product = productVersions.getReleaseByPlatform(this.platform);
+            if (!product) {
+                throw new Error(`Unsupported platform: ${this.platform.os} ${this.platform.arch}`);
+            }
+            const artifact = product.getPreferredArtifact();
+            if (!artifact) {
+                throw new Error(`Artifact not found of Edge ${version} for platform ${this.platform.os} ${this.platform.arch}`);
+            }
+            artifact.Location;
+            core.info(`Acquiring ${version} (${product.ProductVersion}) from ${artifact.Location}`);
+            const archive = yield tc.downloadTool(artifact.Location);
+            return { archive };
+        });
+    }
+    install(version, archive) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const extdir = yield fs_1.default.promises.mkdtemp(path_1.default.join(os_1.default.tmpdir(), "msedge-")); // /tmp/msedge-xxxxxx/
+            yield exec.exec("xar", ["-xf", archive], { cwd: extdir });
+            const pkgdir = (yield fs_1.default.promises.readdir(extdir)).filter((e) => e.startsWith("MicrosoftEdge") && e.endsWith(".pkg"))[0];
+            if (!pkgdir) {
+                throw new Error('"MicrosoftEdge*.pkg" not found in extracted archive');
+            }
+            const pkgroot = path_1.default.join(extdir, pkgdir); // /tmp/msedge-xxxx/MicrosoftEdge-xx.x.xxx.x.pkg/
+            yield fs_1.default.promises.rename(path_1.default.join(pkgroot, "Payload"), path_1.default.join(pkgroot, "App.gz"));
+            yield exec.exec("gzip", ["--decompress", "App.gz"], { cwd: pkgroot });
+            yield exec.exec("cpio", ["--extract", "--file", "App"], { cwd: pkgroot });
+            const app = path_1.default.join(pkgroot, this.appName(version));
+            const root = yield tc.cacheDir(app, "msedge", version);
+            return { root, bin: this.binPath(version) };
+        });
+    }
+    binPath(version) {
+        switch (version) {
+            case versions.StableVersion:
+                return "Contents/MacOS/Microsoft Edge";
+            case versions.BetaVersion:
+                return "Contents/MacOS/Microsoft Edge Beta";
+            case versions.DevVersion:
+                return "Contents/MacOS/Microsoft Edge Dev";
+            case versions.CanaryVersion:
+                return "Contents/MacOS/Microsoft Edge Canary";
+        }
+    }
+    appName(version) {
+        switch (version) {
+            case versions.StableVersion:
+                return "Microsoft Edge.app";
+            case versions.BetaVersion:
+                return "Microsoft Edge Beta.app";
+            case versions.DevVersion:
+                return "Microsoft Edge Dev.app";
+            case versions.CanaryVersion:
+                return "Microsoft Edge Canary.app";
+        }
+    }
+    test(version) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const bin = path_1.default.basename(this.binPath(version));
+            const msedgeBin = yield io.which(bin, true);
+            yield exec.exec(`"${msedgeBin}"`, ["--version"]);
+        });
+    }
+}
+exports.MacInstaller = MacInstaller;
+
+
+/***/ }),
+
+/***/ 332:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.WindowsInstaller = void 0;
 const versions = __importStar(__nccwpck_require__(873));
-const fs_1 = __importDefault(__nccwpck_require__(747));
-const os_1 = __importDefault(__nccwpck_require__(87));
 const path_1 = __importDefault(__nccwpck_require__(622));
-const install = (platform, version) => __awaiter(void 0, void 0, void 0, function* () {
-    core.info(`Attempting to download Edge ${version}...`);
-    const url = (() => {
+const os_1 = __importDefault(__nccwpck_require__(87));
+const fs_1 = __importDefault(__nccwpck_require__(747));
+const tc = __importStar(__nccwpck_require__(784));
+const io = __importStar(__nccwpck_require__(436));
+const core = __importStar(__nccwpck_require__(186));
+const exec = __importStar(__nccwpck_require__(514));
+class WindowsInstaller {
+    constructor(platform) {
+        this.platform = platform;
+    }
+    checkInstalled(version) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const root = this.rootDir(version);
+            try {
+                yield fs_1.default.promises.stat(root);
+            }
+            catch (e) {
+                if (e.code === "ENOENT") {
+                    return undefined;
+                }
+                throw e;
+            }
+            return { root, bin: "msedge.exe" };
+        });
+    }
+    download(version) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const url = this.url(version);
+            core.info(`Acquiring ${version} from ${url}`);
+            let installer = yield tc.downloadTool(url);
+            yield fs_1.default.promises.rename(installer, `${installer}.exe`);
+            installer = `${installer}.exe`;
+            return { archive: installer };
+        });
+    }
+    install(version, archive) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield exec.exec(archive);
+            return { root: this.rootDir(version), bin: "msedge.exe" };
+        });
+    }
+    url(version) {
         switch (version) {
             case versions.StableVersion:
                 return `https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Stable&language=en`;
@@ -5056,8 +5363,8 @@ const install = (platform, version) => __awaiter(void 0, void 0, void 0, functio
             case versions.CanaryVersion:
                 return `https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Canary&language=en`;
         }
-    })();
-    const installDir = (() => {
+    }
+    rootDir(version) {
         switch (version) {
             case versions.StableVersion:
                 return "C:\\Program Files (x86)\\Microsoft\\Edge\\Application";
@@ -5068,23 +5375,21 @@ const install = (platform, version) => __awaiter(void 0, void 0, void 0, functio
             case versions.CanaryVersion:
                 return path_1.default.join(os_1.default.homedir(), "AppData\\Local\\Microsoft\\Edge SxS\\Application");
         }
-    })();
-    core.info(`Acquiring ${version} from ${url}`);
-    let installer = yield tc.downloadTool(url);
-    yield fs_1.default.promises.rename(installer, `${installer}.exe`);
-    installer = `${installer}.exe`;
-    const dir = yield fs_1.default.promises.mkdtemp(path_1.default.join(os_1.default.tmpdir(), ""));
-    core.info("Installing Edge...");
-    try {
-        yield exec.exec(installer);
-        return installDir;
     }
-    catch (e) {
-        core.error("Installation failure" + e);
-        throw e;
+    test(version) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const msedgeBin = yield io.which("msedge", true);
+            yield exec.exec("wmic", [
+                "datafile",
+                "where",
+                `name="${msedgeBin.replace(/\\/g, "\\\\")}"`,
+                "get",
+                "version",
+            ]);
+        });
     }
-});
-exports.install = install;
+}
+exports.WindowsInstaller = WindowsInstaller;
 
 
 /***/ }),

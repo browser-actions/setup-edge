@@ -74,7 +74,9 @@ export class EdgeUpdatesProduct {
     const platformValue = EdgeUpdatesProduct.PlatformValues[os];
     const archValue = EdgeUpdatesProduct.ArchValues[arch];
     const release = this.json.Releases.find(
-      (r) => r.Platform === platformValue && r.Architecture === archValue
+      (r) =>
+        r.Platform === platformValue &&
+        (r.Architecture == "universal" || r.Architecture === archValue)
     );
     if (release) {
       return new EdgeUpdatesProductRelease(release);

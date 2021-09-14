@@ -1,9 +1,11 @@
 import { Installer, InstallResult, DownloadResult } from "./installer";
 import { Platform } from "./platform";
+import { waitInstall } from "./watch";
 import * as versions from "./params";
 import path from "path";
 import os from "os";
 import fs from "fs";
+import cp from "child_process";
 import * as tc from "@actions/tool-cache";
 import * as io from "@actions/io";
 import * as core from "@actions/core";
@@ -42,7 +44,22 @@ export class WindowsInstaller implements Installer {
     version: versions.Version,
     archive: string
   ): Promise<InstallResult> {
-    await exec.exec(archive);
+    // Use a native API to kill the process.
+    const p = cp.spawn(archive);
+    p.stdout.on("data", (data: Buffer) =>
+      process.stdout.write(data.toString())
+    );
+    p.stderr.on("data", (data: Buffer) =>
+      process.stderr.write(data.toString())
+    );
+
+    // Do not wait for the installer, as an installer for windows requires an
+    // OK prompt on the dialog at the end of the install.
+    try {
+      await waitInstall(path.join(this.rootDir(version), "msedge.exe"));
+    } finally {
+      p.kill();
+    }
 
     return { root: this.rootDir(version), bin: "msedge.exe" };
   }

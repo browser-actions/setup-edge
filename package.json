@@ -4,12 +4,12 @@
   "description": "Set up your GitHub Actions workflow with a specific version of edge",
   "main": "dist/index.js",
   "dependencies": {
-    "@actions/core": "^1.2.7",
+    "@actions/core": "^1.5.0",
     "@actions/io": "^1.1.0",
     "@actions/tool-cache": "^1.7.1"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.23",
+    "@types/jest": "^27.0.1",
     "@types/node": "^15.0.2",
     "@typescript-eslint/eslint-plugin": "^4.28.1",
     "@typescript-eslint/parser": "^4.23.0",

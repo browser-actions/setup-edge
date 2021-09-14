@@ -1,5 +1,6 @@
 import { Installer, InstallResult, DownloadResult } from "./installer";
 import { Platform } from "./platform";
+import { waitInstall } from "./watch";
 import * as versions from "./params";
 import path from "path";
 import os from "os";
@@ -42,7 +43,12 @@ export class WindowsInstaller implements Installer {
     version: versions.Version,
     archive: string
   ): Promise<InstallResult> {
-    await exec.exec(archive);
+    // Do not wait for the installer, as an installer for windows requires an
+    // OK prompt on the dialog at the end of the install.
+    await Promise.race([
+      exec.exec(archive),
+      waitInstall(path.join(this.rootDir(version), "msedge.exe"))
+    ]);
 
     return { root: this.rootDir(version), bin: "msedge.exe" };
   }

@@ -3,6 +3,7 @@ import { getPlatform, OS } from "./platform";
 import { valueOfVersion } from "./params";
 import { WindowsInstaller } from "./installer_windows";
 import { MacInstaller } from "./installer_mac";
+import { LinuxInstaller } from "./installer_linux";
 import path from "path";
 
 async function run(): Promise<void> {
@@ -18,8 +19,8 @@ async function run(): Promise<void> {
           return new WindowsInstaller(platform);
         case OS.DARWIN:
           return new MacInstaller(platform);
-        default:
-          throw new Error(`Unsupported platform: ${platform.os}`);
+        case OS.LINUX:
+          return new LinuxInstaller(platform);
       }
     })();
 

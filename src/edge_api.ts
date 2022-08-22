@@ -38,6 +38,7 @@ export class EdgeUpdatesProductRelease {
   private static readonly ArtifactNameValues: { [key: string]: string } = {
     Windows: "msi",
     MacOS: "pkg",
+    Linux: "deb",
   };
 
   constructor(private readonly json: EdgeUpdatesProductReleaseJSON) {}
@@ -57,6 +58,7 @@ export class EdgeUpdatesProduct {
   private static readonly PlatformValues: { [key: string]: string } = {
     [OS.WINDOWS]: "Windows",
     [OS.DARWIN]: "MacOS",
+    [OS.LINUX]: "Linux",
   };
 
   private static readonly ArchValues = {

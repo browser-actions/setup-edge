@@ -6,10 +6,9 @@
 
 This action setups Microsoft Edge in the GitHub Actions environment.
 
-- [X] Install and setup specific version of Microsoft Edge
 - [X] Windows Support
 - [X] macOS Support
-- [ ] Linux Support
+- [X] Linux Support
 
 ## Usage
 

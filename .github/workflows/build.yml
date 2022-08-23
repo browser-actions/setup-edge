@@ -32,17 +32,32 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows, macos]
-        edge-version: [null, "stable", "beta", "dev", "canary"]
+        os: [windows, macos, ubuntu]
     runs-on: ${{ matrix.os }}-latest
     steps:
       - uses: actions/download-artifact@v2
         with:
           name: dist
-      - name: "Install ${{ matrix.edge-version }} on ${{ matrix.os }}"
+      - name: "Install default channel on ${{ matrix.os }}"
+        uses: ./
+      - name: "Install stable channel on ${{ matrix.os }}"
         uses: ./
         with:
-          edge-version: ${{ matrix.edge-version }}
+          edge-version: stable
+      - name: "Install beta channel on ${{ matrix.os }}"
+        uses: ./
+        with:
+          edge-version: beta
+      - name: "Install dev channel on ${{ matrix.os }}"
+        uses: ./
+        with:
+          edge-version: dev
+      - name: "Install canary channel on ${{ matrix.os }}"
+        uses: ./
+        with:
+          edge-version: canary
+        # Canary channel for linux is not currently supported
+        if: ${{ matrix.os != 'ubuntu' }}
 
   deploy:
     runs-on: ubuntu-latest

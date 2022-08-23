@@ -27,18 +27,18 @@ export const waitInstall = (
           // file exists
           resetTimers();
           resolve();
-          return
+          return;
         }
 
-        if (err.code !== 'ENOENT') {
+        if (err.code !== "ENOENT") {
           // unexpected error
           resetTimers();
           reject(err);
-          return
+          return;
         }
 
         // file not found
-      })
+      });
     }, checkIntervalSec * 1000);
   });
 };

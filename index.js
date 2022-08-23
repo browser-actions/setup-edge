@@ -5223,6 +5223,7 @@ exports.EdgeUpdatesProductRelease = EdgeUpdatesProductRelease;
 EdgeUpdatesProductRelease.ArtifactNameValues = {
     Windows: "msi",
     MacOS: "pkg",
+    Linux: "deb",
 };
 class EdgeUpdatesProduct {
     constructor(json) {
@@ -5242,6 +5243,7 @@ exports.EdgeUpdatesProduct = EdgeUpdatesProduct;
 EdgeUpdatesProduct.PlatformValues = {
     [platform_1.OS.WINDOWS]: "Windows",
     [platform_1.OS.DARWIN]: "MacOS",
+    [platform_1.OS.LINUX]: "Linux",
 };
 EdgeUpdatesProduct.ArchValues = {
     [platform_1.Arch.I686]: "x86",
@@ -5331,6 +5333,7 @@ const platform_1 = __nccwpck_require__(999);
 const params_1 = __nccwpck_require__(873);
 const installer_windows_1 = __nccwpck_require__(332);
 const installer_mac_1 = __nccwpck_require__(496);
+const installer_linux_1 = __nccwpck_require__(303);
 const path_1 = __importDefault(__nccwpck_require__(622));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -5344,8 +5347,8 @@ function run() {
                         return new installer_windows_1.WindowsInstaller(platform);
                     case platform_1.OS.DARWIN:
                         return new installer_mac_1.MacInstaller(platform);
-                    default:
-                        throw new Error(`Unsupported platform: ${platform.os}`);
+                    case platform_1.OS.LINUX:
+                        return new installer_linux_1.LinuxInstaller(platform);
                 }
             })();
             const result = yield (() => __awaiter(this, void 0, void 0, function* () {
@@ -5371,6 +5374,119 @@ function run() {
     });
 }
 run();
+
+
+/***/ }),
+
+/***/ 303:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.LinuxInstaller = void 0;
+const edge_api_1 = __nccwpck_require__(147);
+const fs_1 = __importDefault(__nccwpck_require__(747));
+const path_1 = __importDefault(__nccwpck_require__(622));
+const os_1 = __importDefault(__nccwpck_require__(87));
+const tc = __importStar(__nccwpck_require__(784));
+const io = __importStar(__nccwpck_require__(436));
+const core = __importStar(__nccwpck_require__(186));
+const exec = __importStar(__nccwpck_require__(514));
+class LinuxInstaller {
+    constructor(platform) {
+        this.platform = platform;
+        this.api = new edge_api_1.EdgeUpdatesClient();
+    }
+    checkInstalled(version) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const root = tc.find("msedge", version);
+            if (root) {
+                return { root, bin: "msedge" };
+            }
+        });
+    }
+    download(version) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const releases = yield this.api.getReleases();
+            const productVersions = releases.getProduct(version);
+            if (!productVersions) {
+                throw new Error(`Unsupported version: ${version}`);
+            }
+            const product = productVersions.getReleaseByPlatform(this.platform);
+            if (!product) {
+                throw new Error(`Unsupported platform: ${this.platform.os} ${this.platform.arch}`);
+            }
+            const artifact = product.getPreferredArtifact();
+            if (!artifact) {
+                throw new Error(`Artifact not found of Edge ${version} for platform ${this.platform.os} ${this.platform.arch}`);
+            }
+            core.info(`Acquiring ${version} (${product.ProductVersion}) from ${artifact.Location}`);
+            const archive = yield tc.downloadTool(artifact.Location);
+            return { archive };
+        });
+    }
+    install(version, archive) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const tmpdir = yield fs_1.default.promises.mkdtemp(path_1.default.join(os_1.default.tmpdir(), "deb-"));
+            const extdir = yield fs_1.default.promises.mkdtemp(path_1.default.join(os_1.default.tmpdir(), "msedge-"));
+            yield exec.exec("ar", ["x", archive], { cwd: tmpdir });
+            yield exec.exec("tar", [
+                "-xf",
+                path_1.default.join(tmpdir, "data.tar.xz"),
+                "--directory",
+                extdir,
+                "--strip-components",
+                "4",
+                "./opt/microsoft",
+            ]);
+            // remove broken symlink
+            yield fs_1.default.promises.unlink(path_1.default.join(extdir, "microsoft-edge"));
+            const root = yield tc.cacheDir(extdir, "msedge", version);
+            core.info(`Successfully Installed msedge to ${root}`);
+            return { root, bin: "msedge" };
+        });
+    }
+    test(version) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const bin = "msedge";
+            const msedgeBin = yield io.which(bin, true);
+            yield exec.exec(`"${msedgeBin}"`, ["--version"]);
+        });
+    }
+}
+exports.LinuxInstaller = LinuxInstaller;
 
 
 /***/ }),
@@ -5763,7 +5879,7 @@ const waitInstall = (path, timeoutSec = 10 * 60, checkIntervalSec = 5) => {
                     resolve();
                     return;
                 }
-                if (err.code !== 'ENOENT') {
+                if (err.code !== "ENOENT") {
                     // unexpected error
                     resetTimers();
                     reject(err);

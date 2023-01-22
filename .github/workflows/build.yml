@@ -2,6 +2,9 @@ name: 'build-test'
 on:
   pull_request:
   push:
+    branches-ignore:
+      - master
+  workflow_call:
 
 jobs:
   build:
@@ -30,9 +33,8 @@ jobs:
   test:
     needs: [build]
     strategy:
-      fail-fast: false
       matrix:
-        os: [windows, macos, ubuntu]
+        os: [ubuntu, macos, windows]
     runs-on: ${{ matrix.os }}-latest
     steps:
       - uses: actions/download-artifact@v3
@@ -58,41 +60,3 @@ jobs:
           edge-version: canary
         # Canary channel for linux is not currently supported
         if: ${{ matrix.os != 'ubuntu' }}
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: [test]
-    if: github.ref == 'refs/heads/master'
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: 'latest'
-      - uses: actions/download-artifact@v3
-        with:
-          name: dist
-
-      - name: Setup git
-        run: |
-          git config --global user.name "Shin'ya Ueoka"
-          git config --global user.email "ueokande@i-beam.org"
-
-          cat >$HOME/.netrc <<EOF
-          machine github.com
-          login ueokande
-          password ${GITHUB_TOKEN}
-          EOF
-
-      - name: Deploy to latest branch
-        run: |
-          # Abort job successfully when no scripts updated
-          test -z "$(git status --short)" && exit 0
-
-          git add .
-          git commit --message "Release for ${GITHUB_SHA}"
-          git push origin latest
-
-  test-latest:
-    runs-on: windows-latest
-    needs: [deploy]
-    steps:
-      - uses: browser-actions/setup-edge@latest

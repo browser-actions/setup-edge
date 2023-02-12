@@ -6,6 +6,10 @@ import { MacInstaller } from "./installer_mac";
 import { LinuxInstaller } from "./installer_linux";
 import path from "path";
 
+const hasErrorMessage = (e: unknown): e is { message: string | Error } => {
+  return typeof e === "object" && e !== null && "message" in e;
+};
+
 async function run(): Promise<void> {
   try {
     const version = valueOfVersion(core.getInput("edge-version") || "stable");
@@ -46,7 +50,11 @@ async function run(): Promise<void> {
 
     await installer.test(version);
   } catch (error) {
-    core.setFailed(error.message);
+    if (hasErrorMessage(error)) {
+      core.setFailed(error.message);
+    } else {
+      core.setFailed(String(error));
+    }
   }
 }
 

@@ -1,9 +1,5 @@
 import fs from "fs";
 
-const sleep = (millis: number) => {
-  return new Promise((resolve) => setTimeout(resolve, millis));
-};
-
 export const waitInstall = (
   path: string,
   timeoutSec: number = 10 * 60,

@@ -42,6 +42,9 @@ async function run(): Promise<void> {
       const result = await installer.install(version, downloaded.archive);
       core.info(`Successfully setup Edge ${version}`);
 
+      core.setOutput("edge-version", version);
+      core.setOutput("edge-path", result.root + result.bin);
+
       return result;
     })();
 

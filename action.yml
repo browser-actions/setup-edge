@@ -1,17 +1,17 @@
-name: "Setup Edge"
-description: "Install and setup Microsoft Edge"
-author: "Shin'ya Ueoka"
+name: 'Setup Edge'
+description: 'Install and setup Microsoft Edge'
+author: 'Shin'ya Ueoka'
 inputs:
   edge-version:
     description: |-
-      The Edge version to be installed.  Supported versions are "stable", "beta", "dev"
+      The Edge version to be installed.  Supported versions are 'stable', 'beta', 'dev'
     default: stable
     required: false
 outputs:
   edge-version:
-    description: "The installed Edge version. Useful when given a latest version."
+    description: 'The installed Edge version. Useful when given a latest version.'
   edge-path:
-    description: "The installed Edge path."
+    description: 'The installed Edge path.'
 runs:
-  using: "node16"
+  using: 'node16"
   main: "index.js"

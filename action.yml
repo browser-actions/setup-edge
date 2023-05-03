@@ -4,7 +4,7 @@ author: "Shin'ya Ueoka"
 inputs:
   edge-version:
     description: |-
-      The Edge version to be installed.  Supported versions are 'stable', 'beta', 'dev'
+      The Edge version to be installed.  Supported versions are "stable", "beta", "dev"
     default: stable
     required: false
 outputs:

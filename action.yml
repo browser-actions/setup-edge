@@ -1,6 +1,6 @@
 name: 'Setup Edge'
 description: 'Install and setup Microsoft Edge'
-author: 'Shin'ya Ueoka'
+author: "Shin'ya Ueoka"
 inputs:
   edge-version:
     description: |-
@@ -13,5 +13,5 @@ outputs:
   edge-path:
     description: 'The installed Edge path.'
 runs:
-  using: 'node16"
-  main: "index.js"
+  using: 'node16'
+  main: 'index.js'

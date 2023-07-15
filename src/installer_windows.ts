@@ -1,11 +1,10 @@
 import { Installer, InstallResult, DownloadResult } from "./installer";
 import { Platform } from "./platform";
-import { waitInstall } from "./watch";
+import { EdgeUpdatesClient } from "./edge_api";
 import * as versions from "./params";
 import path from "path";
 import os from "os";
 import fs from "fs";
-import cp from "child_process";
 import * as tc from "@actions/tool-cache";
 import * as io from "@actions/io";
 import * as core from "@actions/core";
@@ -18,6 +17,8 @@ const isENOENT = (e: unknown): boolean => {
 };
 
 export class WindowsInstaller implements Installer {
+  private readonly api = new EdgeUpdatesClient();
+
   constructor(private readonly platform: Platform) {}
 
   async checkInstalled(
@@ -36,51 +37,39 @@ export class WindowsInstaller implements Installer {
   }
 
   async download(version: versions.Version): Promise<DownloadResult> {
-    const url = this.url(version);
+    const releases = await this.api.getReleases();
+    const productVersions = releases.getProduct(version);
+    if (!productVersions) {
+      throw new Error(`Unsupported version: ${version}`);
+    }
+    const product = productVersions.getReleaseByPlatform(this.platform);
+    if (!product) {
+      throw new Error(
+        `Unsupported platform: ${this.platform.os} ${this.platform.arch}`
+      );
+    }
+    const artifact = product.getPreferredArtifact();
+    if (!artifact) {
+      throw new Error(
+        `Artifact not found of Edge ${version} for platform ${this.platform.os} ${this.platform.arch}`
+      );
+    }
 
-    core.info(`Acquiring ${version} from ${url}`);
-    let installer = await tc.downloadTool(url);
-    await fs.promises.rename(installer, `${installer}.exe`);
-    installer = `${installer}.exe`;
+    core.info(
+      `Acquiring ${version} (${product.ProductVersion}) from ${artifact.Location}`
+    );
+    const archive = await tc.downloadTool(artifact.Location);
 
-    return { archive: installer };
+    return { archive };
   }
 
   async install(
     version: versions.Version,
     archive: string
   ): Promise<InstallResult> {
-    // Use a native API to kill the process.
-    const p = cp.spawn(archive);
-    p.stdout.on("data", (data: Buffer) =>
-      process.stdout.write(data.toString())
-    );
-    p.stderr.on("data", (data: Buffer) =>
-      process.stderr.write(data.toString())
-    );
-
-    // Do not wait for the installer, as an installer for windows requires an
-    // OK prompt on the dialog at the end of the install.
-    try {
-      await waitInstall(path.join(this.rootDir(version), "msedge.exe"));
-    } finally {
-      p.kill();
-    }
+    await exec.exec("msiexec", ["/i", archive, "/qn"]);
 
     return { root: this.rootDir(version), bin: "msedge.exe" };
-  }
-
-  private url(version: versions.Version): string {
-    switch (version) {
-      case versions.StableVersion:
-        return `https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Stable&language=en`;
-      case versions.BetaVersion:
-        return `https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Beta&language=en`;
-      case versions.DevVersion:
-        return `https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Dev&language=en`;
-      case versions.CanaryVersion:
-        return `https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Canary&language=en`;
-    }
   }
 
   private rootDir(version: versions.Version): string {

@@ -43,7 +43,6 @@ export class MacInstaller implements Installer {
         `Artifact not found of Edge ${version} for platform ${this.platform.os} ${this.platform.arch}`
       );
     }
-    artifact.Location;
 
     core.info(
       `Acquiring ${version} (${product.ProductVersion}) from ${artifact.Location}`

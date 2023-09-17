@@ -8,7 +8,7 @@ describe("EdgeUpdates", () => {
   beforeEach(async () => {
     const content = await fs.promises.readFile(
       path.join(__dirname, "./testdata.json"),
-      "utf-8"
+      "utf-8",
     );
     updates = new EdgeUpdates(JSON.parse(content));
   });
@@ -28,7 +28,7 @@ describe("EdgeUpdatesProduct", () => {
   beforeEach(async () => {
     const content = await fs.promises.readFile(
       path.join(__dirname, "./testdata.json"),
-      "utf-8"
+      "utf-8",
     );
     updates = new EdgeUpdates(JSON.parse(content));
   });
@@ -62,7 +62,7 @@ describe("EdgeUpdatesProductRelease", () => {
   beforeEach(async () => {
     const content = await fs.promises.readFile(
       path.join(__dirname, "./testdata.json"),
-      "utf-8"
+      "utf-8",
     );
     updates = new EdgeUpdates(JSON.parse(content));
   });

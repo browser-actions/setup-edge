@@ -3,7 +3,7 @@ import fs from "fs";
 export const waitInstall = (
   path: string,
   timeoutSec: number = 10 * 60,
-  checkIntervalSec = 5
+  checkIntervalSec = 5,
 ): Promise<void> => {
   return new Promise((resolve, reject) => {
     const resetTimers = () => {

@@ -21,7 +21,7 @@ export class WindowsInstaller implements Installer {
   constructor(private readonly platform: Platform) {}
 
   async checkInstalled(
-    version: versions.Version
+    version: versions.Version,
   ): Promise<InstallResult | undefined> {
     const root = this.rootDir(version);
     try {
@@ -48,15 +48,15 @@ export class WindowsInstaller implements Installer {
 
   async install(
     version: versions.Version,
-    archive: string
+    archive: string,
   ): Promise<InstallResult> {
     // Use a native API to kill the process.
     const p = cp.spawn(archive);
     p.stdout.on("data", (data: Buffer) =>
-      process.stdout.write(data.toString())
+      process.stdout.write(data.toString()),
     );
     p.stderr.on("data", (data: Buffer) =>
-      process.stderr.write(data.toString())
+      process.stderr.write(data.toString()),
     );
 
     // Do not wait for the installer, as an installer for windows requires an
@@ -94,7 +94,7 @@ export class WindowsInstaller implements Installer {
       case versions.CanaryVersion:
         return path.join(
           os.homedir(),
-          "AppData\\Local\\Microsoft\\Edge SxS\\Application"
+          "AppData\\Local\\Microsoft\\Edge SxS\\Application",
         );
     }
   }

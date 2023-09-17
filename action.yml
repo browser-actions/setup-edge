@@ -7,6 +7,11 @@ inputs:
       The Edge version to be installed.  Supported versions are "stable", "beta", "dev"
     default: stable
     required: false
+outputs:
+  edge-version:
+    description: 'The installed Edge version. Useful when given a latest version.'
+  edge-path:
+    description: 'The installed Edge path.'
 runs:
   using: 'node16'
   main: 'index.js'

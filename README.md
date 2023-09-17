@@ -32,10 +32,15 @@ steps:
     run: (Get-Item (Get-Command msedge).Source).VersionInfo.ProductVersion
 ```
 
-## Parameters
+### Input
 
 - `edge-version`:
 *(Optional)* The Edge version to be installed.  Supported versions are "stable", "beta", "dev", and "canary". Default: `stable`.
+
+### Output
+
+- `edge-version`: The installed Edge version. Useful when given a latest version.
+- `edge-path`: The installed Edge path.
 
 ## License
 

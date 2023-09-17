@@ -78,7 +78,7 @@ export class EdgeUpdatesProduct {
     const release = this.json.Releases.find(
       (r) =>
         r.Platform === platformValue &&
-        (r.Architecture == "universal" || r.Architecture === archValue)
+        (r.Architecture == "universal" || r.Architecture === archValue),
     );
     if (release) {
       return new EdgeUpdatesProductRelease(release);
@@ -113,12 +113,12 @@ export class EdgeUpdatesClient {
     const resp = await http.getJson<EdgeUpdatesJSON>(url);
     if (resp.statusCode !== httpm.HttpCodes.OK) {
       throw new Error(
-        `Failed to get latest version: server returns ${resp.statusCode}`
+        `Failed to get latest version: server returns ${resp.statusCode}`,
       );
     }
     if (resp.result === null) {
       throw new Error(
-        "Failed to get latest version: server returns empty body"
+        "Failed to get latest version: server returns empty body",
       );
     }
     return new EdgeUpdates(resp.result);

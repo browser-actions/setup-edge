@@ -16,7 +16,7 @@ export class MacInstaller implements Installer {
   constructor(private readonly platform: Platform) {}
 
   async checkInstalled(
-    version: versions.Version
+    version: versions.Version,
   ): Promise<InstallResult | undefined> {
     const root = tc.find("msedge", version);
     if (root) {
@@ -34,19 +34,19 @@ export class MacInstaller implements Installer {
     const product = productVersions.getReleaseByPlatform(this.platform);
     if (!product) {
       throw new Error(
-        `Unsupported platform: ${this.platform.os} ${this.platform.arch}`
+        `Unsupported platform: ${this.platform.os} ${this.platform.arch}`,
       );
     }
     const artifact = product.getPreferredArtifact();
     if (!artifact) {
       throw new Error(
-        `Artifact not found of Edge ${version} for platform ${this.platform.os} ${this.platform.arch}`
+        `Artifact not found of Edge ${version} for platform ${this.platform.os} ${this.platform.arch}`,
       );
     }
     artifact.Location;
 
     core.info(
-      `Acquiring ${version} (${product.ProductVersion}) from ${artifact.Location}`
+      `Acquiring ${version} (${product.ProductVersion}) from ${artifact.Location}`,
     );
     const archive = await tc.downloadTool(artifact.Location);
 
@@ -55,14 +55,14 @@ export class MacInstaller implements Installer {
 
   async install(
     version: versions.Version,
-    archive: string
+    archive: string,
   ): Promise<InstallResult> {
     const extdir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "msedge-")); // /tmp/msedge-xxxxxx/
 
     await exec.exec("xar", ["-xf", archive], { cwd: extdir });
 
     const pkgdir = (await fs.promises.readdir(extdir)).filter(
-      (e) => e.startsWith("MicrosoftEdge") && e.endsWith(".pkg")
+      (e) => e.startsWith("MicrosoftEdge") && e.endsWith(".pkg"),
     )[0];
     if (!pkgdir) {
       throw new Error('"MicrosoftEdge*.pkg" not found in extracted archive');
@@ -71,7 +71,7 @@ export class MacInstaller implements Installer {
 
     await fs.promises.rename(
       path.join(pkgroot, "Payload"),
-      path.join(pkgroot, "App.gz")
+      path.join(pkgroot, "App.gz"),
     );
     await exec.exec("gzip", ["--decompress", "App.gz"], { cwd: pkgroot });
     await exec.exec("cpio", ["--extract", "--file", "App"], { cwd: pkgroot });

@@ -16,7 +16,7 @@ export class LinuxInstaller implements Installer {
   constructor(private readonly platform: Platform) {}
 
   async checkInstalled(
-    version: versions.Version
+    version: versions.Version,
   ): Promise<InstallResult | undefined> {
     const root = tc.find("msedge", version);
     if (root) {
@@ -33,17 +33,17 @@ export class LinuxInstaller implements Installer {
     const product = productVersions.getReleaseByPlatform(this.platform);
     if (!product) {
       throw new Error(
-        `Unsupported platform: ${this.platform.os} ${this.platform.arch}`
+        `Unsupported platform: ${this.platform.os} ${this.platform.arch}`,
       );
     }
     const artifact = product.getPreferredArtifact();
     if (!artifact) {
       throw new Error(
-        `Artifact not found of Edge ${version} for platform ${this.platform.os} ${this.platform.arch}`
+        `Artifact not found of Edge ${version} for platform ${this.platform.os} ${this.platform.arch}`,
       );
     }
     core.info(
-      `Acquiring ${version} (${product.ProductVersion}) from ${artifact.Location}`
+      `Acquiring ${version} (${product.ProductVersion}) from ${artifact.Location}`,
     );
     const archive = await tc.downloadTool(artifact.Location);
 
@@ -52,7 +52,7 @@ export class LinuxInstaller implements Installer {
 
   async install(
     version: versions.Version,
-    archive: string
+    archive: string,
   ): Promise<InstallResult> {
     const tmpdir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "deb-"));
     const extdir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "msedge-"));

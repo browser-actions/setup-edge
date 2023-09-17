@@ -77,7 +77,7 @@ export class LinuxInstaller implements Installer {
     return { root, bin: "msedge" };
   }
 
-  async test(version: versions.Version): Promise<void> {
+  async test(_version: versions.Version): Promise<void> {
     const bin = "msedge";
     const msedgeBin = await io.which(bin, true);
     await exec.exec(`"${msedgeBin}"`, ["--version"]);

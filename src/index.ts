@@ -43,7 +43,7 @@ async function run(): Promise<void> {
       core.info(`Successfully setup Edge ${version}`);
 
       core.setOutput("edge-version", version);
-      core.setOutput("edge-path", result.root + "/" + result.bin);
+      core.setOutput("edge-path", path.join(result.root, result.bin));
 
       return result;
     })();

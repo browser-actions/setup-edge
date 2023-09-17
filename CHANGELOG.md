@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.1.0](https://github.com/browser-actions/setup-edge/compare/setup-edge-v1.0.2...setup-edge-v1.1.0) (2023-09-17)
+
+
+### Features
+
+* Support output parameters to expose installed edge ([#396](https://github.com/browser-actions/setup-edge/issues/396)) ([3892198](https://github.com/browser-actions/setup-edge/commit/389219807401df203d8536ab26631b6e7474ffc7))
+
+
+### Bug Fixes
+
+* **deps:** bump the actions group with 2 updates ([#390](https://github.com/browser-actions/setup-edge/issues/390)) ([7d6c3c5](https://github.com/browser-actions/setup-edge/commit/7d6c3c5dc8f65d178b691335bc772c42164d2ad2))
+* **deps:** migrate a package manager to pnpm ([#388](https://github.com/browser-actions/setup-edge/issues/388)) ([1022605](https://github.com/browser-actions/setup-edge/commit/102260513477ae7d3a6570b62d98361fbe1d2046))
+
 ## [1.0.2](https://github.com/browser-actions/setup-edge/compare/setup-edge-v1.0.1...setup-edge-v1.0.2) (2023-03-16)
 
 

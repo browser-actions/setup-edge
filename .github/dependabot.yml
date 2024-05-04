@@ -11,7 +11,3 @@ updates:
       actions:
         patterns:
           - "@actions/*"
-      typescript:
-        patterns:
-          - "typescript"
-          - "@typescript-*"

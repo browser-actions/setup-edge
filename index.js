@@ -6624,8 +6624,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.EdgeUpdatesClient = exports.EdgeUpdates = exports.EdgeUpdatesProduct = exports.EdgeUpdatesProductRelease = void 0;
 const httpm = __importStar(__nccwpck_require__(2228));
-const platform_1 = __nccwpck_require__(2149);
 const params_1 = __nccwpck_require__(7163);
+const platform_1 = __nccwpck_require__(2149);
 class EdgeUpdatesProductRelease {
     constructor(json) {
         this.json = json;
@@ -6652,7 +6652,7 @@ class EdgeUpdatesProduct {
         const platformValue = EdgeUpdatesProduct.PlatformValues[os];
         const archValue = EdgeUpdatesProduct.ArchValues[arch];
         const release = this.json.Releases.find((r) => r.Platform === platformValue &&
-            (r.Architecture == "universal" || r.Architecture === archValue));
+            (r.Architecture === "universal" || r.Architecture === archValue));
         if (release) {
             return new EdgeUpdatesProductRelease(release);
         }
@@ -6751,13 +6751,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+const node_path_1 = __importDefault(__nccwpck_require__(9411));
 const core = __importStar(__nccwpck_require__(8434));
-const platform_1 = __nccwpck_require__(2149);
-const params_1 = __nccwpck_require__(7163);
-const installer_windows_1 = __nccwpck_require__(4042);
-const installer_mac_1 = __nccwpck_require__(9913);
 const installer_linux_1 = __nccwpck_require__(8077);
-const path_1 = __importDefault(__nccwpck_require__(1017));
+const installer_mac_1 = __nccwpck_require__(9913);
+const installer_windows_1 = __nccwpck_require__(4042);
+const params_1 = __nccwpck_require__(7163);
+const platform_1 = __nccwpck_require__(2149);
 const hasErrorMessage = (e) => {
     return typeof e === "object" && e !== null && "message" in e;
 };
@@ -6789,11 +6789,11 @@ function run() {
                 const result = yield installer.install(version, downloaded.archive);
                 core.info(`Successfully setup Edge ${version}`);
                 core.setOutput("edge-version", version);
-                core.setOutput("edge-path", path_1.default.join(result.root, result.bin));
+                core.setOutput("edge-path", node_path_1.default.join(result.root, result.bin));
                 return result;
             }))();
-            const bin = path_1.default.join(result.root, result.bin);
-            core.addPath(path_1.default.dirname(bin));
+            const bin = node_path_1.default.join(result.root, result.bin);
+            core.addPath(node_path_1.default.dirname(bin));
             yield installer.test(version);
         }
         catch (error) {
@@ -6853,14 +6853,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.LinuxInstaller = void 0;
-const edge_api_1 = __nccwpck_require__(3794);
-const fs_1 = __importDefault(__nccwpck_require__(7147));
-const path_1 = __importDefault(__nccwpck_require__(1017));
-const os_1 = __importDefault(__nccwpck_require__(2037));
-const tc = __importStar(__nccwpck_require__(725));
-const io = __importStar(__nccwpck_require__(6051));
+const node_fs_1 = __importDefault(__nccwpck_require__(7561));
+const node_os_1 = __importDefault(__nccwpck_require__(612));
+const node_path_1 = __importDefault(__nccwpck_require__(9411));
 const core = __importStar(__nccwpck_require__(8434));
 const exec = __importStar(__nccwpck_require__(8445));
+const io = __importStar(__nccwpck_require__(6051));
+const tc = __importStar(__nccwpck_require__(725));
+const edge_api_1 = __nccwpck_require__(3794);
 class LinuxInstaller {
     constructor(platform) {
         this.platform = platform;
@@ -6896,12 +6896,12 @@ class LinuxInstaller {
     }
     install(version, archive) {
         return __awaiter(this, void 0, void 0, function* () {
-            const tmpdir = yield fs_1.default.promises.mkdtemp(path_1.default.join(os_1.default.tmpdir(), "deb-"));
-            const extdir = yield fs_1.default.promises.mkdtemp(path_1.default.join(os_1.default.tmpdir(), "msedge-"));
+            const tmpdir = yield node_fs_1.default.promises.mkdtemp(node_path_1.default.join(node_os_1.default.tmpdir(), "deb-"));
+            const extdir = yield node_fs_1.default.promises.mkdtemp(node_path_1.default.join(node_os_1.default.tmpdir(), "msedge-"));
             yield exec.exec("ar", ["x", archive], { cwd: tmpdir });
             yield exec.exec("tar", [
                 "-xf",
-                path_1.default.join(tmpdir, "data.tar.xz"),
+                node_path_1.default.join(tmpdir, "data.tar.xz"),
                 "--directory",
                 extdir,
                 "--strip-components",
@@ -6909,7 +6909,7 @@ class LinuxInstaller {
                 "./opt/microsoft",
             ]);
             // remove broken symlink
-            yield fs_1.default.promises.unlink(path_1.default.join(extdir, "microsoft-edge"));
+            yield node_fs_1.default.promises.unlink(node_path_1.default.join(extdir, "microsoft-edge"));
             const root = yield tc.cacheDir(extdir, "msedge", version);
             core.info(`Successfully Installed msedge to ${root}`);
             return { root, bin: "msedge" };
@@ -6970,15 +6970,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MacInstaller = void 0;
-const edge_api_1 = __nccwpck_require__(3794);
-const versions = __importStar(__nccwpck_require__(7163));
-const path_1 = __importDefault(__nccwpck_require__(1017));
-const os_1 = __importDefault(__nccwpck_require__(2037));
-const fs_1 = __importDefault(__nccwpck_require__(7147));
-const tc = __importStar(__nccwpck_require__(725));
-const io = __importStar(__nccwpck_require__(6051));
+const node_fs_1 = __importDefault(__nccwpck_require__(7561));
+const node_os_1 = __importDefault(__nccwpck_require__(612));
+const node_path_1 = __importDefault(__nccwpck_require__(9411));
 const core = __importStar(__nccwpck_require__(8434));
 const exec = __importStar(__nccwpck_require__(8445));
+const io = __importStar(__nccwpck_require__(6051));
+const tc = __importStar(__nccwpck_require__(725));
+const edge_api_1 = __nccwpck_require__(3794);
+const versions = __importStar(__nccwpck_require__(7163));
 class MacInstaller {
     constructor(platform) {
         this.platform = platform;
@@ -7008,7 +7008,6 @@ class MacInstaller {
             if (!artifact) {
                 throw new Error(`Artifact not found of Edge ${version} for platform ${this.platform.os} ${this.platform.arch}`);
             }
-            artifact.Location;
             core.info(`Acquiring ${version} (${product.ProductVersion}) from ${artifact.Location}`);
             const archive = yield tc.downloadTool(artifact.Location);
             return { archive };
@@ -7016,17 +7015,17 @@ class MacInstaller {
     }
     install(version, archive) {
         return __awaiter(this, void 0, void 0, function* () {
-            const extdir = yield fs_1.default.promises.mkdtemp(path_1.default.join(os_1.default.tmpdir(), "msedge-")); // /tmp/msedge-xxxxxx/
+            const extdir = yield node_fs_1.default.promises.mkdtemp(node_path_1.default.join(node_os_1.default.tmpdir(), "msedge-")); // /tmp/msedge-xxxxxx/
             yield exec.exec("xar", ["-xf", archive], { cwd: extdir });
-            const pkgdir = (yield fs_1.default.promises.readdir(extdir)).filter((e) => e.startsWith("MicrosoftEdge") && e.endsWith(".pkg"))[0];
+            const pkgdir = (yield node_fs_1.default.promises.readdir(extdir)).filter((e) => e.startsWith("MicrosoftEdge") && e.endsWith(".pkg"))[0];
             if (!pkgdir) {
                 throw new Error('"MicrosoftEdge*.pkg" not found in extracted archive');
             }
-            const pkgroot = path_1.default.join(extdir, pkgdir); // /tmp/msedge-xxxx/MicrosoftEdge-xx.x.xxx.x.pkg/
-            yield fs_1.default.promises.rename(path_1.default.join(pkgroot, "Payload"), path_1.default.join(pkgroot, "App.gz"));
+            const pkgroot = node_path_1.default.join(extdir, pkgdir); // /tmp/msedge-xxxx/MicrosoftEdge-xx.x.xxx.x.pkg/
+            yield node_fs_1.default.promises.rename(node_path_1.default.join(pkgroot, "Payload"), node_path_1.default.join(pkgroot, "App.gz"));
             yield exec.exec("gzip", ["--decompress", "App.gz"], { cwd: pkgroot });
             yield exec.exec("cpio", ["--extract", "--file", "App"], { cwd: pkgroot });
-            const app = path_1.default.join(pkgroot, this.appName(version));
+            const app = node_path_1.default.join(pkgroot, this.appName(version));
             const root = yield tc.cacheDir(app, "msedge", version);
             return { root, bin: this.binPath(version) };
         });
@@ -7057,7 +7056,7 @@ class MacInstaller {
     }
     test(version) {
         return __awaiter(this, void 0, void 0, function* () {
-            const bin = path_1.default.basename(this.binPath(version));
+            const bin = node_path_1.default.basename(this.binPath(version));
             const msedgeBin = yield io.which(bin, true);
             yield exec.exec(`"${msedgeBin}"`, ["--version"]);
         });
@@ -7110,16 +7109,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.WindowsInstaller = void 0;
-const watch_1 = __nccwpck_require__(2013);
-const versions = __importStar(__nccwpck_require__(7163));
-const path_1 = __importDefault(__nccwpck_require__(1017));
-const os_1 = __importDefault(__nccwpck_require__(2037));
-const fs_1 = __importDefault(__nccwpck_require__(7147));
-const child_process_1 = __importDefault(__nccwpck_require__(2081));
-const tc = __importStar(__nccwpck_require__(725));
-const io = __importStar(__nccwpck_require__(6051));
+const node_child_process_1 = __importDefault(__nccwpck_require__(7718));
+const node_fs_1 = __importDefault(__nccwpck_require__(7561));
+const node_os_1 = __importDefault(__nccwpck_require__(612));
+const node_path_1 = __importDefault(__nccwpck_require__(9411));
 const core = __importStar(__nccwpck_require__(8434));
 const exec = __importStar(__nccwpck_require__(8445));
+const io = __importStar(__nccwpck_require__(6051));
+const tc = __importStar(__nccwpck_require__(725));
+const versions = __importStar(__nccwpck_require__(7163));
+const watch_1 = __nccwpck_require__(2013);
 const isENOENT = (e) => {
     return (typeof e === "object" && e !== null && "code" in e && e.code === "ENOENT");
 };
@@ -7131,7 +7130,7 @@ class WindowsInstaller {
         return __awaiter(this, void 0, void 0, function* () {
             const root = this.rootDir(version);
             try {
-                yield fs_1.default.promises.stat(root);
+                yield node_fs_1.default.promises.stat(root);
             }
             catch (e) {
                 if (isENOENT(e)) {
@@ -7147,7 +7146,7 @@ class WindowsInstaller {
             const url = this.url(version);
             core.info(`Acquiring ${version} from ${url}`);
             let installer = yield tc.downloadTool(url);
-            yield fs_1.default.promises.rename(installer, `${installer}.exe`);
+            yield node_fs_1.default.promises.rename(installer, `${installer}.exe`);
             installer = `${installer}.exe`;
             return { archive: installer };
         });
@@ -7155,13 +7154,13 @@ class WindowsInstaller {
     install(version, archive) {
         return __awaiter(this, void 0, void 0, function* () {
             // Use a native API to kill the process.
-            const p = child_process_1.default.spawn(archive);
+            const p = node_child_process_1.default.spawn(archive);
             p.stdout.on("data", (data) => process.stdout.write(data.toString()));
             p.stderr.on("data", (data) => process.stderr.write(data.toString()));
             // Do not wait for the installer, as an installer for windows requires an
             // OK prompt on the dialog at the end of the install.
             try {
-                yield (0, watch_1.waitInstall)(path_1.default.join(this.rootDir(version), "msedge.exe"));
+                yield (0, watch_1.waitInstall)(node_path_1.default.join(this.rootDir(version), "msedge.exe"));
             }
             finally {
                 p.kill();
@@ -7172,13 +7171,13 @@ class WindowsInstaller {
     url(version) {
         switch (version) {
             case versions.StableVersion:
-                return `https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Stable&language=en`;
+                return "https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Stable&language=en";
             case versions.BetaVersion:
-                return `https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Beta&language=en`;
+                return "https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Beta&language=en";
             case versions.DevVersion:
-                return `https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Dev&language=en`;
+                return "https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Dev&language=en";
             case versions.CanaryVersion:
-                return `https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Canary&language=en`;
+                return "https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Canary&language=en";
         }
     }
     rootDir(version) {
@@ -7190,7 +7189,7 @@ class WindowsInstaller {
             case versions.DevVersion:
                 return "C:\\Program Files (x86)\\Microsoft\\Edge Dev\\Application";
             case versions.CanaryVersion:
-                return path_1.default.join(os_1.default.homedir(), "AppData\\Local\\Microsoft\\Edge SxS\\Application");
+                return node_path_1.default.join(node_os_1.default.homedir(), "AppData\\Local\\Microsoft\\Edge SxS\\Application");
         }
     }
     test(_version) {
@@ -7230,7 +7229,7 @@ const valueOfVersion = (value) => {
         case exports.CanaryVersion:
             return value;
         default:
-            throw new Error("Unsupported version: " + value);
+            throw new Error(`Unsupported versions: ${value}`);
     }
 };
 exports.valueOfVersion = valueOfVersion;
@@ -7248,7 +7247,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getPlatform = exports.getArch = exports.getOS = exports.Arch = exports.OS = void 0;
-const os_1 = __importDefault(__nccwpck_require__(2037));
+const node_os_1 = __importDefault(__nccwpck_require__(612));
 exports.OS = {
     DARWIN: "darwin",
     LINUX: "linux",
@@ -7260,7 +7259,7 @@ exports.Arch = {
     ARM64: "arm64",
 };
 const getOS = () => {
-    const platform = os_1.default.platform();
+    const platform = node_os_1.default.platform();
     switch (platform) {
         case "linux":
             return exports.OS.LINUX;
@@ -7273,12 +7272,14 @@ const getOS = () => {
 };
 exports.getOS = getOS;
 const getArch = () => {
-    const arch = os_1.default.arch();
+    const arch = node_os_1.default.arch();
     switch (arch) {
         case "x32":
             return exports.Arch.I686;
         case "x64":
             return exports.Arch.AMD64;
+        case "arm64":
+            return exports.Arch.ARM64;
     }
     throw new Error(`Unsupported arch: ${arch}`);
 };
@@ -7304,7 +7305,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.waitInstall = void 0;
-const fs_1 = __importDefault(__nccwpck_require__(7147));
+const node_fs_1 = __importDefault(__nccwpck_require__(7561));
 const waitInstall = (path, timeoutSec = 10 * 60, checkIntervalSec = 5) => {
     return new Promise((resolve, reject) => {
         const resetTimers = () => {
@@ -7317,7 +7318,7 @@ const waitInstall = (path, timeoutSec = 10 * 60, checkIntervalSec = 5) => {
             reject(`Install timed-out: ${path}`);
         }, timeoutSec * 1000);
         const watchId = setInterval(() => {
-            fs_1.default.access(path, fs_1.default.constants.F_OK, (err) => {
+            node_fs_1.default.access(path, node_fs_1.default.constants.F_OK, (err) => {
                 if (err === null) {
                     // file exists
                     resetTimers();
@@ -7401,6 +7402,38 @@ module.exports = require("https");
 
 "use strict";
 module.exports = require("net");
+
+/***/ }),
+
+/***/ 7718:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:child_process");
+
+/***/ }),
+
+/***/ 7561:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:fs");
+
+/***/ }),
+
+/***/ 612:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:os");
+
+/***/ }),
+
+/***/ 9411:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:path");
 
 /***/ }),
 

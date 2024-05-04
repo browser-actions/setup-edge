@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.1](https://github.com/browser-actions/setup-edge/compare/setup-edge-v1.1.0...setup-edge-v1.1.1) (2024-05-04)
+
+
+### Bug Fixes
+
+* bump supported node version ([#492](https://github.com/browser-actions/setup-edge/issues/492)) ([e881e3c](https://github.com/browser-actions/setup-edge/commit/e881e3c926a41786c24a4c8d795203a37c3da8c2))
+* support arm64 ([#486](https://github.com/browser-actions/setup-edge/issues/486)) ([7afa789](https://github.com/browser-actions/setup-edge/commit/7afa7897671de544c501c458fc80348021c7e3c9))
+
 ## [1.1.0](https://github.com/browser-actions/setup-edge/compare/setup-edge-v1.0.2...setup-edge-v1.1.0) (2023-09-17)
 
 

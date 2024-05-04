@@ -1,15 +1,15 @@
-import { Installer, InstallResult, DownloadResult } from "./installer";
-import { Platform } from "./platform";
-import { waitInstall } from "./watch";
-import * as versions from "./params";
-import path from "path";
-import os from "os";
-import fs from "fs";
-import cp from "child_process";
-import * as tc from "@actions/tool-cache";
-import * as io from "@actions/io";
+import cp from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
+import * as io from "@actions/io";
+import * as tc from "@actions/tool-cache";
+import type { DownloadResult, InstallResult, Installer } from "./installer";
+import * as versions from "./params";
+import type { Platform } from "./platform";
+import { waitInstall } from "./watch";
 
 const isENOENT = (e: unknown): boolean => {
   return (
@@ -73,13 +73,13 @@ export class WindowsInstaller implements Installer {
   private url(version: versions.Version): string {
     switch (version) {
       case versions.StableVersion:
-        return `https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Stable&language=en`;
+        return "https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Stable&language=en";
       case versions.BetaVersion:
-        return `https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Beta&language=en`;
+        return "https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Beta&language=en";
       case versions.DevVersion:
-        return `https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Dev&language=en`;
+        return "https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Dev&language=en";
       case versions.CanaryVersion:
-        return `https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Canary&language=en`;
+        return "https://c2rsetup.officeapps.live.com/c2r/downloadEdge.aspx?platform=Default&Channel=Canary&language=en";
     }
   }
 

@@ -1,10 +1,10 @@
+import path from "node:path";
 import * as core from "@actions/core";
-import { getPlatform, OS } from "./platform";
-import { valueOfVersion } from "./params";
-import { WindowsInstaller } from "./installer_windows";
-import { MacInstaller } from "./installer_mac";
 import { LinuxInstaller } from "./installer_linux";
-import path from "path";
+import { MacInstaller } from "./installer_mac";
+import { WindowsInstaller } from "./installer_windows";
+import { valueOfVersion } from "./params";
+import { OS, getPlatform } from "./platform";
 
 const hasErrorMessage = (e: unknown): e is { message: string | Error } => {
   return typeof e === "object" && e !== null && "message" in e;

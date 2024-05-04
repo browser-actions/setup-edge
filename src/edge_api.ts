@@ -1,12 +1,12 @@
 import * as httpm from "@actions/http-client";
-import { Platform, OS, Arch } from "./platform";
 import {
-  StableVersion,
   BetaVersion,
-  DevVersion,
   CanaryVersion,
-  Version,
+  DevVersion,
+  StableVersion,
+  type Version,
 } from "./params";
+import { Arch, OS, type Platform } from "./platform";
 
 type EdgeUpdatesProductReleaseArtifactJSON = {
   ArtifactName: string;
@@ -78,7 +78,7 @@ export class EdgeUpdatesProduct {
     const release = this.json.Releases.find(
       (r) =>
         r.Platform === platformValue &&
-        (r.Architecture == "universal" || r.Architecture === archValue),
+        (r.Architecture === "universal" || r.Architecture === archValue),
     );
     if (release) {
       return new EdgeUpdatesProductRelease(release);

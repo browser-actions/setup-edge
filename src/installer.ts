@@ -1,4 +1,4 @@
-import * as versions from "./params";
+import type * as versions from "./params";
 
 export type InstallResult = {
   root: string; // root is a directory containing all contents for chromium

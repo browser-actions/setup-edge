@@ -1,14 +1,14 @@
-import { Installer, InstallResult, DownloadResult } from "./installer";
-import { Platform } from "./platform";
-import { EdgeUpdatesClient } from "./edge_api";
-import * as versions from "./params";
-import fs from "fs";
-import path from "path";
-import os from "os";
-import * as tc from "@actions/tool-cache";
-import * as io from "@actions/io";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
+import * as io from "@actions/io";
+import * as tc from "@actions/tool-cache";
+import { EdgeUpdatesClient } from "./edge_api";
+import type { DownloadResult, InstallResult, Installer } from "./installer";
+import type * as versions from "./params";
+import type { Platform } from "./platform";
 
 export class LinuxInstaller implements Installer {
   private readonly api = new EdgeUpdatesClient();

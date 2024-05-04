@@ -17,6 +17,6 @@ export const valueOfVersion = (value: string): Version => {
     case CanaryVersion:
       return value;
     default:
-      throw new Error("Unsupported version: " + value);
+      throw new Error(`Unsupported versions: ${value}`);
   }
 };

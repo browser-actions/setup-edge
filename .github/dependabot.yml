@@ -11,13 +11,3 @@ updates:
       actions:
         patterns:
           - "@actions/*"
-      typescript:
-        patterns:
-          - "typescript"
-          - "@typescript-*"
-      jest:
-        patterns:
-          - "jest"
-          - "jest-*"
-          - "ts-jest"
-          - "@types/jest"

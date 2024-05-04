@@ -1,5 +1,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { beforeEach, describe, expect, it } from "vitest";
 import { EdgeUpdates } from "../src/edge_api";
 
 describe("EdgeUpdates", () => {

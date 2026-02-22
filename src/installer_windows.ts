@@ -101,12 +101,11 @@ export class WindowsInstaller implements Installer {
 
   async test(_version: versions.Version): Promise<void> {
     const msedgeBin = await io.which("msedge", true);
-    await exec.exec("wmic", [
-      "datafile",
-      "where",
-      `name="${msedgeBin.replace(/\\/g, "\\\\")}"`,
-      "get",
-      "version",
+    await exec.exec("powershell", [
+      "-NoProfile",
+      "-NonInteractive",
+      "-Command",
+      `(Get-Item (Get-Command '${msedgeBin}').Source).VersionInfo.ProductVersion`,
     ]);
   }
 }

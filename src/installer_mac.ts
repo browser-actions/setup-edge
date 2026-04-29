@@ -60,20 +60,6 @@ export class MacInstaller implements Installer {
 
     await exec.exec("xar", ["-xf", archive], { cwd: extdir });
 
-    // Log directory tree to diagnose where the .app bundle is located
-    const walk = async (dir: string, depth = 0): Promise<void> => {
-      if (depth > 3) return;
-      for (const e of await fs.promises.readdir(dir)) {
-        core.info(`${"  ".repeat(depth)}${e}`);
-        const full = path.join(dir, e);
-        if ((await fs.promises.stat(full)).isDirectory()) {
-          await walk(full, depth + 1);
-        }
-      }
-    };
-    core.info(`Extracted pkg structure under ${extdir}:`);
-    await walk(extdir);
-
     const pkgdir = (await fs.promises.readdir(extdir)).filter(
       (e) => e.startsWith("MicrosoftEdge") && e.endsWith(".pkg"),
     )[0];
@@ -89,26 +75,18 @@ export class MacInstaller implements Installer {
     await exec.exec("gzip", ["--decompress", "App.gz"], { cwd: pkgroot });
     await exec.exec("cpio", ["--extract", "--file", "App"], { cwd: pkgroot });
 
-    const app = path.join(pkgroot, this.appName(version));
+    // tc.cacheDir copies the *contents* of the source dir into the cache root,
+    // so we wrap the .app inside a subdirectory to preserve the .app name and
+    // extension. Without this, the bundle root in the cache lacks the .app
+    // suffix and Edge refuses to launch (exits with null on macOS 15+).
+    const wrapperDir = path.join(extdir, "wrapper");
+    await fs.promises.mkdir(wrapperDir);
+    await fs.promises.rename(
+      path.join(pkgroot, this.appName(version)),
+      path.join(wrapperDir, this.appName(version)),
+    );
 
-    // Diagnose codesign and quarantine attributes before caching
-    core.info(`App path: ${app}`);
-    core.info(`App exists: ${fs.existsSync(app)}`);
-    await exec.exec("codesign", ["--verify", "--verbose=4", app], {
-      ignoreReturnCode: true,
-    });
-    await exec.exec("xattr", ["-l", app], { ignoreReturnCode: true });
-    await exec.exec("spctl", ["-a", "-v", app], { ignoreReturnCode: true });
-
-    const root = await tc.cacheDir(app, "msedge", version);
-
-    // Diagnose cached binary
-    const cachedBin = path.join(root, this.binPath(version));
-    core.info(`Cached binary: ${cachedBin}`);
-    core.info(`Cached binary exists: ${fs.existsSync(cachedBin)}`);
-    await exec.exec("ls", ["-la", path.dirname(cachedBin)], {
-      ignoreReturnCode: true,
-    });
+    const root = await tc.cacheDir(wrapperDir, "msedge", version);
 
     return { root, bin: this.binPath(version) };
   }
@@ -116,13 +94,13 @@ export class MacInstaller implements Installer {
   private binPath(version: versions.Version): string {
     switch (version) {
       case versions.StableVersion:
-        return "Contents/MacOS/Microsoft Edge";
+        return "Microsoft Edge.app/Contents/MacOS/Microsoft Edge";
       case versions.BetaVersion:
-        return "Contents/MacOS/Microsoft Edge Beta";
+        return "Microsoft Edge Beta.app/Contents/MacOS/Microsoft Edge Beta";
       case versions.DevVersion:
-        return "Contents/MacOS/Microsoft Edge Dev";
+        return "Microsoft Edge Dev.app/Contents/MacOS/Microsoft Edge Dev";
       case versions.CanaryVersion:
-        return "Contents/MacOS/Microsoft Edge Canary";
+        return "Microsoft Edge Canary.app/Contents/MacOS/Microsoft Edge Canary";
     }
   }
 
@@ -142,17 +120,6 @@ export class MacInstaller implements Installer {
   async test(version: versions.Version): Promise<void> {
     const bin = path.basename(this.binPath(version));
     const msedgeBin = await io.which(bin, true);
-    core.info(`Testing binary: ${msedgeBin}`);
-    const output = await exec.getExecOutput(`"${msedgeBin}"`, ["--version"], {
-      ignoreReturnCode: true,
-    });
-    core.info(`stdout: ${output.stdout}`);
-    core.info(`stderr: ${output.stderr}`);
-    core.info(`exit code: ${output.exitCode}`);
-    if (output.exitCode !== 0) {
-      throw new Error(
-        `Edge binary test failed with exit code ${output.exitCode}\nstderr: ${output.stderr}`,
-      );
-    }
+    await exec.exec(`"${msedgeBin}"`, ["--version"]);
   }
 }

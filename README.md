@@ -42,6 +42,10 @@ steps:
 - `edge-version`: The installed Edge version. Useful when given a latest version.
 - `edge-path`: The installed Edge path.
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, workflow, and release process.
+
 ## License
 
 [MIT](LICENSE)

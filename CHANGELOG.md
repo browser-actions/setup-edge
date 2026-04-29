@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.2](https://github.com/browser-actions/setup-edge/compare/setup-edge-v1.1.1...setup-edge-v1.1.2) (2026-04-29)
+
+
+### Bug Fixes
+
+* support latest Windows and macOS runners ([#553](https://github.com/browser-actions/setup-edge/issues/553)) ([90ed50f](https://github.com/browser-actions/setup-edge/commit/90ed50fcfb7552936ea881b39485f24c5636ca72))
+* update Node.js runtime to v24 LTS ([#555](https://github.com/browser-actions/setup-edge/issues/555)) ([ddb5420](https://github.com/browser-actions/setup-edge/commit/ddb5420339a4653151e2520dcb2d56c090569eef))
+
 ## [1.1.1](https://github.com/browser-actions/setup-edge/compare/setup-edge-v1.1.0...setup-edge-v1.1.1) (2024-05-04)
 
 

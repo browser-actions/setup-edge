@@ -31,7 +31,8 @@ async function run(): Promise<void> {
     const result = await (async () => {
       const installed = await installer.checkInstalled(version);
       if (installed) {
-        core.info(`Edge ${version} is already installed @ ${installed.root}`);
+        const bin = path.join(installed.root, installed.bin);
+        core.info(`Edge ${version} is already installed @ ${bin}`);
         return installed;
       }
 

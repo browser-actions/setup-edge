@@ -75,8 +75,18 @@ export class MacInstaller implements Installer {
     await exec.exec("gzip", ["--decompress", "App.gz"], { cwd: pkgroot });
     await exec.exec("cpio", ["--extract", "--file", "App"], { cwd: pkgroot });
 
-    const app = path.join(pkgroot, this.appName(version));
-    const root = await tc.cacheDir(app, "msedge", version);
+    // tc.cacheDir copies the *contents* of the source dir into the cache root,
+    // so we wrap the .app inside a subdirectory to preserve the .app name and
+    // extension. Without this, the bundle root in the cache lacks the .app
+    // suffix and Edge refuses to launch (exits with null on macOS 15+).
+    const wrapperDir = path.join(extdir, "wrapper");
+    await fs.promises.mkdir(wrapperDir);
+    await fs.promises.rename(
+      path.join(pkgroot, this.appName(version)),
+      path.join(wrapperDir, this.appName(version)),
+    );
+
+    const root = await tc.cacheDir(wrapperDir, "msedge", version);
 
     return { root, bin: this.binPath(version) };
   }
@@ -84,13 +94,13 @@ export class MacInstaller implements Installer {
   private binPath(version: versions.Version): string {
     switch (version) {
       case versions.StableVersion:
-        return "Contents/MacOS/Microsoft Edge";
+        return "Microsoft Edge.app/Contents/MacOS/Microsoft Edge";
       case versions.BetaVersion:
-        return "Contents/MacOS/Microsoft Edge Beta";
+        return "Microsoft Edge Beta.app/Contents/MacOS/Microsoft Edge Beta";
       case versions.DevVersion:
-        return "Contents/MacOS/Microsoft Edge Dev";
+        return "Microsoft Edge Dev.app/Contents/MacOS/Microsoft Edge Dev";
       case versions.CanaryVersion:
-        return "Contents/MacOS/Microsoft Edge Canary";
+        return "Microsoft Edge Canary.app/Contents/MacOS/Microsoft Edge Canary";
     }
   }
 

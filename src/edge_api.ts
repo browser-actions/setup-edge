@@ -62,7 +62,6 @@ export class EdgeUpdatesProduct {
   };
 
   private static readonly ArchValues = {
-    [Arch.I686]: "x86",
     [Arch.AMD64]: "x64",
     [Arch.ARM64]: "arm64",
   };

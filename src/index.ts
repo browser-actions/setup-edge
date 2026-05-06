@@ -4,7 +4,7 @@ import { LinuxInstaller } from "./installer_linux";
 import { MacInstaller } from "./installer_mac";
 import { WindowsInstaller } from "./installer_windows";
 import { valueOfVersion } from "./params";
-import { OS, getPlatform } from "./platform";
+import { getPlatform, OS } from "./platform";
 
 const hasErrorMessage = (e: unknown): e is { message: string | Error } => {
   return typeof e === "object" && e !== null && "message" in e;

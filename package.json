@@ -16,18 +16,18 @@
     "@actions/tool-cache": "^4.0.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.7.2",
-    "@types/node": "^18.13.0",
-    "@vercel/ncc": "^0.38.0",
-    "typescript": "^5.2.2",
-    "vitest": "^1.6.0"
+    "@biomejs/biome": "^2.4.14",
+    "@types/node": "^25.6.0",
+    "@vercel/ncc": "^0.38.4",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
   },
   "scripts": {
     "build": "ncc build src/index.ts",
     "package": "cp action.yml README.md dist/",
     "test": "vitest",
     "lint": "biome ci .",
-    "lint:fix": "biome check --apply ."
+    "lint:fix": "biome check --write ."
   },
   "repository": {
     "type": "git",

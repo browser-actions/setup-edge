@@ -6,7 +6,7 @@ import * as exec from "@actions/exec";
 import * as io from "@actions/io";
 import * as tc from "@actions/tool-cache";
 import { EdgeUpdatesClient } from "./edge_api";
-import type { DownloadResult, InstallResult, Installer } from "./installer";
+import type { DownloadResult, Installer, InstallResult } from "./installer";
 import type * as versions from "./params";
 import type { Platform } from "./platform";
 

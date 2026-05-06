@@ -6,7 +6,7 @@ import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import * as io from "@actions/io";
 import * as tc from "@actions/tool-cache";
-import type { DownloadResult, InstallResult, Installer } from "./installer";
+import type { DownloadResult, Installer, InstallResult } from "./installer";
 import * as versions from "./params";
 import type { Platform } from "./platform";
 import { waitInstall } from "./watch";
@@ -18,7 +18,7 @@ const isENOENT = (e: unknown): boolean => {
 };
 
 export class WindowsInstaller implements Installer {
-  constructor(private readonly platform: Platform) {}
+  constructor(readonly _platform: Platform) {}
 
   async checkInstalled(
     version: versions.Version,

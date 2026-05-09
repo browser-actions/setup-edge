@@ -34,12 +34,11 @@ steps:
 
 ### Supported version formats
 
-The action supports the following version formats:
+| Version format | Example | Download source |
+| --- | --- | --- |
+| Channel name | `stable` (default), `beta`, `dev`, `canary` | [Microsoft Edge Updates][] |
 
-- `stable` (default)
-- `beta`
-- `dev`
-- `canary`
+[Microsoft Edge Updates]: https://edgeupdates.microsoft.com/api/products
 
 ## Supported platforms
 

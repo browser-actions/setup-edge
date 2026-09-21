@@ -49,7 +49,7 @@ describe("EdgeUpdatesProduct", () => {
       const product = updates?.getProduct("stable");
       const release = product?.getReleaseByPlatform({
         os: "linux",
-        arch: "amd64",
+        arch: "arm64",
       });
 
       expect(release).toBeUndefined();

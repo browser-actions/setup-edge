@@ -77,7 +77,8 @@ export class EdgeUpdatesProduct {
     const release = this.json.Releases.find(
       (r) =>
         r.Platform === platformValue &&
-        (r.Architecture === "universal" || r.Architecture === archValue),
+        (r.Architecture === "universal" || r.Architecture === archValue) &&
+        new EdgeUpdatesProductRelease(r).getPreferredArtifact() !== undefined,
     );
     if (release) {
       return new EdgeUpdatesProductRelease(release);

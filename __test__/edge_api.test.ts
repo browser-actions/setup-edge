@@ -35,6 +35,49 @@ describe("EdgeUpdatesProduct", () => {
   });
 
   describe("getReleaseByPlatform", () => {
+    it("skips matching releases without an installer artifact", async () => {
+      const content = await fs.promises.readFile(
+        path.join(import.meta.dirname, "./testdata.json"),
+        "utf-8",
+      );
+      const data = JSON.parse(content);
+      const stable = data.find(
+        (product: { Product: string }) => product.Product === "Stable",
+      );
+      const mac = stable.Releases.find(
+        (release: { Platform: string }) => release.Platform === "MacOS",
+      );
+      stable.Releases = [
+        { ...mac, Architecture: "universal", Artifacts: [] },
+        { ...mac, Architecture: "universal" },
+      ];
+
+      const release = new EdgeUpdates(data)
+        .getProduct("stable")
+        ?.getReleaseByPlatform({ os: "darwin", arch: "arm64" });
+
+      expect(release?.getPreferredArtifact()?.ArtifactName).toBe("pkg");
+    });
+
+    it("returns undefined when matching releases have no installer artifact", async () => {
+      const content = await fs.promises.readFile(
+        path.join(import.meta.dirname, "./testdata.json"),
+        "utf-8",
+      );
+      const data = JSON.parse(content);
+      for (const product of data) {
+        for (const release of product.Releases) {
+          release.Artifacts = [];
+        }
+      }
+
+      expect(
+        new EdgeUpdates(data)
+          .getProduct("stable")
+          ?.getReleaseByPlatform({ os: "darwin", arch: "amd64" }),
+      ).toBeUndefined();
+    });
+
     it("returns the release by platform", async () => {
       const product = updates?.getProduct("stable");
       const release = product?.getReleaseByPlatform({

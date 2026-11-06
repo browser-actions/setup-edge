@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.3](https://github.com/browser-actions/setup-edge/compare/setup-edge-v1.1.2...setup-edge-v1.1.3) (2026-11-06)
+
+
+### Bug Fixes
+
+* modernize dependencies and lock GitHub Actions ([#562](https://github.com/browser-actions/setup-edge/issues/562)) ([1df6400](https://github.com/browser-actions/setup-edge/commit/1df64004d8e62a14769c138022772d9b0c863b99))
+
 ## [1.1.2](https://github.com/browser-actions/setup-edge/compare/setup-edge-v1.1.1...setup-edge-v1.1.2) (2026-05-06)
 
 

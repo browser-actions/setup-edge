@@ -4,11 +4,11 @@
 
 # setup-edge
 
-This action setups Microsoft Edge in the GitHub Actions environment.
+This action sets up Microsoft Edge for GitHub Actions. This action supports the following features:
 
-- [X] Windows Support
-- [X] macOS Support
-- [X] Linux Support
+- Install and set up Microsoft Edge onto the runner.
+- Install a specific release channel of Microsoft Edge (stable, beta, dev, and canary).
+- Cross-platform runner support (Windows, macOS, Linux) and self-hosted runner support.
 
 ## Usage
 
@@ -31,6 +31,22 @@ steps:
   - name: Print Edge version
     run: (Get-Item (Get-Command msedge).Source).VersionInfo.ProductVersion
 ```
+
+### Supported version formats
+
+| Version format | Example | Download source |
+| --- | --- | --- |
+| Channel name | `stable` (default), `beta`, `dev`, `canary` | [Microsoft Edge Updates][] |
+
+[Microsoft Edge Updates]: https://edgeupdates.microsoft.com/api/products
+
+## Supported platforms
+
+| Linux x64 | Linux ARM64 | Linux ARM32 | macOS x64 | macOS ARM64 | Windows x64 | Windows ARM64 |
+| ---       | ---         | ---         | ---       | ---         | ---         | ---           |
+| ✅        | ✅          | ❌          | ✅        | ✅          | ✅          | ✅            |
+
+## Parameters
 
 ### Input
 
